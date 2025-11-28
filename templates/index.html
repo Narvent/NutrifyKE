@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutrifyKE - Daily Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#10B981',
+                        secondary: '#ECFDF5',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
+
+    <header class="bg-primary text-white p-6 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-3xl font-bold tracking-tight">NutrifyKE 🇰🇪</h1>
+            <div class="text-right">
+                <p class="text-sm opacity-90">Total Calories Today</p>
+                <p class="text-4xl font-extrabold" id="total-calories">0</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6 max-w-2xl">
+
+        <!-- Daily Dashboard -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                    </path>
+                </svg>
+                Daily Dashboard
+            </h2>
+
+            <!-- Goal Setting with Reset Button -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="block text-sm font-medium text-gray-600">Daily Goal (kcal)</label>
+                    <button onclick="resetDay()"
+                        class="text-xs text-red-600 hover:text-red-700 font-semibold flex items-center transition-colors">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                            </path>
+                        </svg>
+                        Reset Day
+                    </button>
+                </div>
+                <input type="number" id="calorie-goal" value="2500" min="500" step="100"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
+                    onchange="saveToLocalStorage(); updateProgressBar();">
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-600">Calorie Progress</span>
+                    <span class="text-sm font-bold text-green-600" id="calories-remaining">2500 kcal remaining</span>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs text-gray-500" id="progress-text">0 / 2500 kcal</span>
+                    <span class="text-xs text-gray-500" id="progress-percentage">0% of daily goal</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                    <div id="progress-bar"
+                        class="bg-gradient-to-r from-green-400 to-primary h-4 rounded-full transition-all duration-500 ease-out"
+                        style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Macro Stats -->
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg p-4 border border-indigo-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <svg class="w-5 h-5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"></path>
+                        </svg>
+                        <span class="text-xs font-medium text-indigo-600">Protein</span>
+                    </div>
+                    <p class="text-2xl font-bold text-indigo-700" id="total-protein">0g</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-4 border border-amber-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"></path>
+                        </svg>
+                        <span class="text-xs font-medium text-amber-600">Carbs</span>
+                    </div>
+                    <p class="text-2xl font-bold text-amber-700" id="total-carbs">0g</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-rose-50 to-red-50 rounded-lg p-4 border border-rose-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <svg class="w-5 h-5 text-rose-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"></path>
+                        </svg>
+                        <span class="text-xs font-medium text-rose-600">Fats</span>
+                    </div>
+                    <p class="text-2xl font-bold text-rose-700" id="total-fats">0g</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Meal Form -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Log a Meal
+            </h2>
+
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-sm font-medium text-gray-600">Select Food</label>
+                        <button onclick="document.getElementById('camera-input').click()"
+                            class="text-primary hover:text-green-600 flex items-center text-sm font-semibold transition-colors">
+                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Scan Food
+                        </button>
+                    </div>
+                    <input type="file" id="camera-input" accept="image/*" class="hidden"
+                        onchange="handleImageUpload(this)">
+                    <select id="food-select"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                        <option value="" disabled selected>Loading foods...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Quantity (Servings)</label>
+                    <input type="number" id="quantity" value="1" min="0.1" step="0.1"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                </div>
+
+                <button onclick="logMeal()"
+                    class="w-full bg-primary hover:bg-green-600 text-white font-bold py-3 rounded-lg shadow transition transform active:scale-95">
+                    Log Meal
+                </button>
+            </div>
+        </div>
+
+        <!-- Today's Log -->
+        <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Today's Log</h2>
+            <div id="log-list" class="space-y-3">
+                <p class="text-gray-400 text-center italic py-4" id="empty-log-msg">No meals logged yet today.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Floating Camera Button -->
+    <button onclick="document.getElementById('camera-input').click()"
+        class="fixed bottom-6 right-6 z-50 w-16 h-16 bg-primary hover:bg-green-600 text-white rounded-full shadow-2xl transition-transform hover:scale-110 active:scale-90 flex items-center justify-center"
+        title="Scan Food">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+            </path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z">
+            </path>
+        </svg>
+    </button>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay"
+        class="fixed inset-0 bg-black/90 z-[60] hidden flex flex-col items-center justify-center backdrop-blur-sm transition-opacity duration-300">
+        <div class="relative flex items-center justify-center mb-8">
+            <div class="absolute w-32 h-32 bg-primary rounded-full opacity-20 animate-ping"></div>
+            <div class="absolute w-24 h-24 bg-primary rounded-full opacity-40 animate-pulse delay-75"></div>
+            <div
+                class="relative bg-white/10 p-4 rounded-full border border-primary/50 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                <svg class="w-10 h-10 text-primary animate-bounce" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+                    </path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+            </div>
+        </div>
+        <h3 class="text-2xl font-bold text-white tracking-widest animate-pulse">ANALYZING MEAL</h3>
+        <p class="text-green-400 text-sm mt-2 font-mono">Identifying Food & Estimating Portions...</p>
+    </div>
+
+    <script>
+        const DEMO_FOODS = [
+            { id: 101, name: "Chapati", calories: 120, protein_g: 3, fat_g: 4, carbs_g: 18 },
+            { id: 102, name: "Ugali", calories: 150, protein_g: 2, fat_g: 0.5, carbs_g: 33 },
+            { id: 103, name: "Sukuma Wiki", calories: 40, protein_g: 3, fat_g: 1, carbs_g: 6 },
+            { id: 104, name: "Beef Stew", calories: 250, protein_g: 25, fat_g: 15, carbs_g: 5 },
+            { id: 105, name: "Rice", calories: 130, protein_g: 2, fat_g: 0.3, carbs_g: 28 }
+        ];
+
+        let dailyLog = [];
+        let totalCalories = 0;
+        let totalProtein = 0;
+        let totalCarbs = 0;
+        let totalFats = 0;
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('nutrifyLog');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    dailyLog = data.log || [];
+                    totalCalories = data.totalCalories || 0;
+                    totalProtein = data.totalProtein || 0;
+                    totalCarbs = data.totalCarbs || 0;
+                    totalFats = data.totalFats || 0;
+
+                    if (data.calorieGoal) {
+                        document.getElementById('calorie-goal').value = data.calorieGoal;
+                    }
+
+                    renderLogs();
+                    updateAllStats();
+                    console.log('✅ Loaded saved data from localStorage');
+                } catch (e) {
+                    console.error('Failed to load saved data:', e);
+                }
+            }
+        }
+
+        function saveToLocalStorage() {
+            const data = {
+                log: dailyLog,
+                totalCalories: totalCalories,
+                totalProtein: totalProtein,
+                totalCarbs: totalCarbs,
+                totalFats: totalFats,
+                calorieGoal: parseInt(document.getElementById('calorie-goal').value) || 2500,
+                lastUpdated: new Date().toISOString()
+            };
+            localStorage.setItem('nutrifyLog', JSON.stringify(data));
+        }
+
+        function renderLogs() {
+            const logList = document.getElementById('log-list');
+
+            if (dailyLog.length > 0) {
+                logList.innerHTML = '';
+
+                dailyLog.forEach((meal, index) => {
+                    const item = document.createElement('div');
+                    item.className = "flex justify-between items-center bg-secondary p-4 rounded-lg border border-green-100";
+                    item.innerHTML = `
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-800">
+                                ${meal.name}
+                                <span class="ml-2 px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500 border border-gray-200">${meal.time || 'Log'}</span>
+                            </p>
+                            <p class="text-xs text-gray-500">${meal.quantity} serving(s)</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-primary">${Math.round(meal.calories)} kcal</p>
+                            <p class="text-xs text-gray-500">P:${Math.round(meal.protein_g)}g F:${Math.round(meal.fat_g)}g C:${Math.round(meal.carbs_g)}g</p>
+                        </div>
+                        <button onclick="deleteMeal(${index})" class="ml-3 text-red-400 hover:text-red-600 transition-colors cursor-pointer p-2" title="Delete meal">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    `;
+                    logList.appendChild(item);
+                });
+            } else {
+                logList.innerHTML = '<p class="text-gray-400 text-center italic py-4" id="empty-log-msg">No meals logged yet today.</p>';
+            }
+        }
+
+        function deleteMeal(index) {
+            if (confirm('Delete this meal from your log?')) {
+                dailyLog.splice(index, 1);
+
+                totalCalories = 0;
+                totalProtein = 0;
+                totalCarbs = 0;
+                totalFats = 0;
+
+                dailyLog.forEach(meal => {
+                    totalCalories += meal.calories;
+                    totalProtein += meal.protein_g;
+                    totalCarbs += meal.carbs_g;
+                    totalFats += meal.fat_g;
+                });
+
+                updateAllStats();
+                saveToLocalStorage();
+                renderLogs();
+
+                console.log('🗑️ Meal deleted');
+            }
+        }
+
+        function updateAllStats() {
+            document.getElementById('total-calories').textContent = Math.round(totalCalories);
+            document.getElementById('total-protein').textContent = Math.round(totalProtein) + 'g';
+            document.getElementById('total-carbs').textContent = Math.round(totalCarbs) + 'g';
+            document.getElementById('total-fats').textContent = Math.round(totalFats) + 'g';
+            updateProgressBar();
+        }
+
+        function resetDay() {
+            if (confirm('Are you sure you want to reset today\'s log? This will clear all meals and start fresh.')) {
+                localStorage.removeItem('nutrifyLog');
+                dailyLog = [];
+                totalCalories = 0;
+                totalProtein = 0;
+                totalCarbs = 0;
+                totalFats = 0;
+
+                updateAllStats();
+                renderLogs();
+                console.log('🔄 Day reset - all data cleared');
+            }
+        }
+
+        async function init() {
+            loadFromLocalStorage();
+
+            const select = document.getElementById('food-select');
+            try {
+                const response = await fetch('/search?q=a');
+                if (!response.ok) throw new Error('Network response was not ok');
+                const foods = await response.json();
+                populateDropdown(foods);
+            } catch (error) {
+                console.warn("Backend unreachable, switching to Demo Mode.", error);
+                populateDropdown(DEMO_FOODS);
+            }
+        }
+
+        function populateDropdown(foods) {
+            const select = document.getElementById('food-select');
+            select.innerHTML = '<option value="" disabled selected>Select a food...</option>';
+            foods.sort((a, b) => a.name.localeCompare(b.name));
+            foods.forEach(food => {
+                const option = document.createElement('option');
+                option.value = food.id;
+                option.textContent = food.name;
+                select.appendChild(option);
+            });
+        }
+
+        async function logMeal() {
+            const select = document.getElementById('food-select');
+            const quantityInput = document.getElementById('quantity');
+            const foodId = select.value;
+            const quantity = parseFloat(quantityInput.value);
+
+            if (!foodId || isNaN(quantity) || quantity <= 0) {
+                alert("Please select a food and enter a valid quantity.");
+                return;
+            }
+
+            let mealData = null;
+
+            try {
+                const response = await fetch(`/calculate?id=${foodId}&quantity=${quantity}`);
+                if (!response.ok) throw new Error('Calculation failed');
+                mealData = await response.json();
+            } catch (error) {
+                console.warn("Calculation API failed, using local demo logic.", error);
+                const food = DEMO_FOODS.find(f => f.id == foodId);
+                if (food) {
+                    mealData = {
+                        name: food.name,
+                        calories: food.calories * quantity,
+                        protein_g: food.protein_g * quantity,
+                        fat_g: food.fat_g * quantity,
+                        carbs_g: food.carbs_g * quantity
+                    };
+                } else {
+                    alert("Error: Could not calculate meal.");
+                    return;
+                }
+            }
+
+            addMealToLog(mealData, quantity);
+        }
+
+        function addMealToLog(meal, quantity) {
+            totalCalories += meal.calories;
+            totalProtein += meal.protein_g;
+            totalCarbs += meal.carbs_g;
+            totalFats += meal.fat_g;
+
+            const timeString = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+            dailyLog.push({
+                name: meal.name,
+                quantity: quantity,
+                calories: meal.calories,
+                protein_g: meal.protein_g,
+                fat_g: meal.fat_g,
+                carbs_g: meal.carbs_g,
+                time: timeString,
+                timestamp: new Date().toISOString()
+            });
+
+            saveToLocalStorage();
+            updateAllStats();
+            renderLogs();
+        }
+
+        function updateProgressBar() {
+            const goal = parseInt(document.getElementById('calorie-goal').value) || 2500;
+            const percentage = Math.min((totalCalories / goal) * 100, 100);
+            const remaining = goal - totalCalories;
+
+            document.getElementById('progress-bar').style.width = percentage + '%';
+            document.getElementById('progress-text').textContent = `${Math.round(totalCalories)} / ${goal} kcal`;
+            document.getElementById('progress-percentage').textContent = `${Math.round(percentage)}% of daily goal`;
+
+            const remainingElement = document.getElementById('calories-remaining');
+            if (remaining >= 0) {
+                remainingElement.textContent = `${Math.round(remaining)} kcal remaining`;
+                remainingElement.className = 'text-sm font-bold text-green-600';
+            } else {
+                remainingElement.textContent = `${Math.round(Math.abs(remaining))} kcal OVER LIMIT!`;
+                remainingElement.className = 'text-sm font-bold text-red-600';
+            }
+        }
+
+        async function handleImageUpload(input) {
+            if (input.files && input.files[0]) {
+                // Show loading overlay
+                document.getElementById('loading-overlay').classList.remove('hidden');
+
+                const file = input.files[0];
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const btn = document.querySelector('button[onclick="document.getElementById(\'camera-input\').click()"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="animate-pulse">Scanning...</span>';
+                btn.disabled = true;
+
+                try {
+                    const response = await fetch('/analyze', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) throw new Error('Analysis failed');
+
+                    const result = await response.json();
+
+                    if (result.error || result.status === 'error') {
+                        alert(result.error || 'Failed to detect food');
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    } else if (result.status === 'success' && result.foods_found) {
+                        const foodsFound = result.foods_found;
+
+                        foodsFound.forEach(meal => {
+                            addMealToLog(meal, meal.input_quantity || '1 serving');
+                        });
+
+                        const foodNames = foodsFound.map(f => f.name).join(', ');
+                        btn.innerHTML = `<span class="text-green-600 font-bold">✓ Logged: ${foodNames}</span>`;
+
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }, 3000);
+                    } else {
+                        alert("Unexpected response format from server.");
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert("Failed to analyze image. Please try again.");
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                } finally {
+                    // Hide loading overlay
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                }
+
+                input.value = '';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+
+    <style>
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out forwards;
+        }
+    </style>
+</body>
+
+</html>
