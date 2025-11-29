@@ -22,10 +22,10 @@ def load_data():
 
         with open(file_path, 'r') as f:
             FOOD_DATA = json.load(f)
-            print(f"✅ Successfully loaded {len(FOOD_DATA)} items from {file_path}")
+            print(f"[SUCCESS] Loaded {len(FOOD_DATA)} items from {file_path}")
             
     except Exception as e:
-        print(f"❌ Error loading data: {e}")
+        print(f"[ERROR] Error loading data: {e}")
         FOOD_DATA = []
 
 def get_food_by_id(food_id):
