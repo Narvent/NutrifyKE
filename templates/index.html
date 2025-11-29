@@ -345,7 +345,7 @@
 
             const select = document.getElementById('food-select');
             try {
-                const response = await fetch('/search?q=a');
+                const response = await fetch('/foods');
                 if (!response.ok) throw new Error('Network response was not ok');
                 const foods = await response.json();
                 populateDropdown(foods);
