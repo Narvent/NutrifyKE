@@ -565,5 +565,734 @@
                 "weight_g": 400
             }
         ]
+    },
+    {
+        "id": 22,
+        "name": "Arrowroot (Nduma - Boiled)",
+        "calories_per_100g": 118,
+        "protein_per_100g": 1.4,
+        "fat_per_100g": 0.2,
+        "carbs_per_100g": 27.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 150,
+            "label": "Pieces"
+        },
+        "portions": [
+            {
+                "label": "Small Piece",
+                "weight_g": 100
+            },
+            {
+                "label": "Medium Piece",
+                "weight_g": 150
+            },
+            {
+                "label": "Large Piece",
+                "weight_g": 250
+            }
+        ]
+    },
+    {
+        "id": 23,
+        "name": "Potatoes (Irish - Boiled)",
+        "calories_per_100g": 87,
+        "protein_per_100g": 1.9,
+        "fat_per_100g": 0.1,
+        "carbs_per_100g": 20.1,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 100,
+            "label": "Potatoes"
+        },
+        "portions": [
+            {
+                "label": "Small Portion",
+                "weight_g": 150
+            },
+            {
+                "label": "Standard Plate",
+                "weight_g": 250
+            },
+            {
+                "label": "Large Heap",
+                "weight_g": 350
+            }
+        ]
+    },
+    {
+        "id": 24,
+        "name": "Brown Ugali (Millet/Sorghum)",
+        "calories_per_100g": 145,
+        "protein_per_100g": 2.0,
+        "fat_per_100g": 0.6,
+        "carbs_per_100g": 30.7,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Small (Tennis Ball)",
+                "weight_g": 150
+            },
+            {
+                "label": "Medium (Fist)",
+                "weight_g": 250
+            },
+            {
+                "label": "Large (Brick)",
+                "weight_g": 400
+            }
+        ]
+    },
+    {
+        "id": 25,
+        "name": "Uji (Fermented Porridge)",
+        "calories_per_100g": 58,
+        "protein_per_100g": 3.1,
+        "fat_per_100g": 3.5,
+        "carbs_per_100g": 3.6,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "ml"
+        },
+        "portions": [
+            {
+                "label": "Small Cup",
+                "weight_g": 250
+            },
+            {
+                "label": "Standard Mug",
+                "weight_g": 350
+            },
+            {
+                "label": "Large Bowl",
+                "weight_g": 500
+            }
+        ]
+    },
+    {
+        "id": 26,
+        "name": "Ndengu (Green Gram Stew)",
+        "calories_per_100g": 109,
+        "protein_per_100g": 6.3,
+        "fat_per_100g": 4.2,
+        "carbs_per_100g": 9.3,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Small Bowl",
+                "weight_g": 150
+            },
+            {
+                "label": "Standard Bowl",
+                "weight_g": 250
+            },
+            {
+                "label": "Large Bowl",
+                "weight_g": 350
+            }
+        ]
+    },
+    {
+        "id": 27,
+        "name": "Njahi (Black Bean Stew)",
+        "calories_per_100g": 120,
+        "protein_per_100g": 7.5,
+        "fat_per_100g": 2.1,
+        "carbs_per_100g": 20.0,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Small Bowl",
+                "weight_g": 150
+            },
+            {
+                "label": "Standard Bowl",
+                "weight_g": 250
+            },
+            {
+                "label": "Large Bowl",
+                "weight_g": 350
+            }
+        ]
+    },
+    {
+        "id": 28,
+        "name": "Soya Chunks (Stewed)",
+        "calories_per_100g": 120,
+        "protein_per_100g": 16.0,
+        "fat_per_100g": 5.0,
+        "carbs_per_100g": 4.0,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Small Bowl",
+                "weight_g": 150
+            },
+            {
+                "label": "Standard Bowl",
+                "weight_g": 250
+            },
+            {
+                "label": "Large Bowl",
+                "weight_g": 350
+            }
+        ]
+    },
+    {
+        "id": 29,
+        "name": "Liver (Beef - Fried)",
+        "calories_per_100g": 175,
+        "protein_per_100g": 27.3,
+        "fat_per_100g": 7.3,
+        "carbs_per_100g": 1.0,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Small Serving",
+                "weight_g": 100
+            },
+            {
+                "label": "Standard Serving",
+                "weight_g": 150
+            },
+            {
+                "label": "Large Serving",
+                "weight_g": 250
+            }
+        ]
+    },
+    {
+        "id": 30,
+        "name": "Eggs (Boiled)",
+        "calories_per_100g": 134,
+        "protein_per_100g": 12.7,
+        "fat_per_100g": 8.1,
+        "carbs_per_100g": 1.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 50,
+            "label": "Eggs"
+        },
+        "portions": [
+            {
+                "label": "1 Egg",
+                "weight_g": 50
+            },
+            {
+                "label": "2 Eggs",
+                "weight_g": 100
+            },
+            {
+                "label": "3 Eggs",
+                "weight_g": 150
+            }
+        ]
+    },
+    {
+        "id": 31,
+        "name": "Groundnuts (Roasted)",
+        "calories_per_100g": 567,
+        "protein_per_100g": 25.8,
+        "fat_per_100g": 49.2,
+        "carbs_per_100g": 16.1,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Handful",
+                "weight_g": 30
+            },
+            {
+                "label": "Small Packet",
+                "weight_g": 50
+            },
+            {
+                "label": "Cup",
+                "weight_g": 100
+            }
+        ]
+    },
+    {
+        "id": 32,
+        "name": "Managu (Nightshade - Fried)",
+        "calories_per_100g": 59,
+        "protein_per_100g": 3.6,
+        "fat_per_100g": 2.5,
+        "carbs_per_100g": 5.5,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Side Portion",
+                "weight_g": 100
+            },
+            {
+                "label": "Standard Cup",
+                "weight_g": 150
+            },
+            {
+                "label": "Large Bowl",
+                "weight_g": 250
+            }
+        ]
+    },
+    {
+        "id": 33,
+        "name": "Terere (Amaranth - Fried)",
+        "calories_per_100g": 83,
+        "protein_per_100g": 3.0,
+        "fat_per_100g": 5.3,
+        "carbs_per_100g": 2.9,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Side Portion",
+                "weight_g": 100
+            },
+            {
+                "label": "Standard Cup",
+                "weight_g": 150
+            },
+            {
+                "label": "Large Bowl",
+                "weight_g": 250
+            }
+        ]
+    },
+    {
+        "id": 34,
+        "name": "Kunde (Cowpea Leaves - Fried)",
+        "calories_per_100g": 75,
+        "protein_per_100g": 3.5,
+        "fat_per_100g": 4.0,
+        "carbs_per_100g": 6.0,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Side Portion",
+                "weight_g": 100
+            },
+            {
+                "label": "Standard Cup",
+                "weight_g": 150
+            },
+            {
+                "label": "Large Bowl",
+                "weight_g": 250
+            }
+        ]
+    },
+    {
+        "id": 35,
+        "name": "Spinach (Stir Fried)",
+        "calories_per_100g": 74,
+        "protein_per_100g": 2.8,
+        "fat_per_100g": 5.4,
+        "carbs_per_100g": 2.0,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Side Portion",
+                "weight_g": 100
+            },
+            {
+                "label": "Standard Cup",
+                "weight_g": 150
+            },
+            {
+                "label": "Large Bowl",
+                "weight_g": 250
+            }
+        ]
+    },
+    {
+        "id": 36,
+        "name": "Tea (Chai ya Maziwa)",
+        "calories_per_100g": 36,
+        "protein_per_100g": 1.1,
+        "fat_per_100g": 1.2,
+        "carbs_per_100g": 5.4,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "ml"
+        },
+        "portions": [
+            {
+                "label": "Small Cup",
+                "weight_g": 200
+            },
+            {
+                "label": "Standard Mug",
+                "weight_g": 300
+            },
+            {
+                "label": "Large Thermos Cup",
+                "weight_g": 500
+            }
+        ]
+    },
+    {
+        "id": 37,
+        "name": "Samosa (Beef)",
+        "calories_per_100g": 260,
+        "protein_per_100g": 10.0,
+        "fat_per_100g": 15.0,
+        "carbs_per_100g": 22.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 40,
+            "label": "Pieces"
+        },
+        "portions": [
+            {
+                "label": "1 Samosa",
+                "weight_g": 40
+            },
+            {
+                "label": "2 Samosas",
+                "weight_g": 80
+            },
+            {
+                "label": "3 Samosas",
+                "weight_g": 120
+            }
+        ]
+    },
+    {
+        "id": 38,
+        "name": "Smokies (Farmer's Choice)",
+        "calories_per_100g": 220,
+        "protein_per_100g": 11.0,
+        "fat_per_100g": 15.0,
+        "carbs_per_100g": 10.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 28,
+            "label": "Pieces"
+        },
+        "portions": [
+            {
+                "label": "1 Smokie",
+                "weight_g": 28
+            },
+            {
+                "label": "2 Smokies",
+                "weight_g": 56
+            },
+            {
+                "label": "Pair (Jumbo)",
+                "weight_g": 80
+            }
+        ]
+    },
+    {
+        "id": 39,
+        "name": "Banana (Ripe)",
+        "calories_per_100g": 89,
+        "protein_per_100g": 1.1,
+        "fat_per_100g": 0.3,
+        "carbs_per_100g": 22.8,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 100,
+            "label": "Bananas"
+        },
+        "portions": [
+            {
+                "label": "Small Banana",
+                "weight_g": 80
+            },
+            {
+                "label": "Medium Banana",
+                "weight_g": 110
+            },
+            {
+                "label": "Large Banana",
+                "weight_g": 150
+            }
+        ]
+    },
+    {
+        "id": 40,
+        "name": "Avocado",
+        "calories_per_100g": 160,
+        "protein_per_100g": 2.0,
+        "fat_per_100g": 14.7,
+        "carbs_per_100g": 8.5,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 150,
+            "label": "Fruits"
+        },
+        "portions": [
+            {
+                "label": "Quarter",
+                "weight_g": 50
+            },
+            {
+                "label": "Half Avocado",
+                "weight_g": 80
+            },
+            {
+                "label": "Whole Avocado",
+                "weight_g": 160
+            }
+        ]
+    },
+    {
+        "id": 41,
+        "name": "Soda (Coke/Fanta/Sprite)",
+        "calories_per_100g": 42,
+        "protein_per_100g": 0.0,
+        "fat_per_100g": 0.0,
+        "carbs_per_100g": 10.6,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "ml"
+        },
+        "portions": [
+            {
+                "label": "Glass (300ml)",
+                "weight_g": 300
+            },
+            {
+                "label": "Bottle (500ml)",
+                "weight_g": 500
+            },
+            {
+                "label": "Large Bottle (1L)",
+                "weight_g": 1000
+            }
+        ]
+    },
+    {
+        "id": 42,
+        "name": "Water",
+        "calories_per_100g": 0,
+        "protein_per_100g": 0.0,
+        "fat_per_100g": 0.0,
+        "carbs_per_100g": 0.0,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "ml"
+        },
+        "portions": [
+            {
+                "label": "Glass",
+                "weight_g": 250
+            },
+            {
+                "label": "Bottle (500ml)",
+                "weight_g": 500
+            },
+            {
+                "label": "1 Liter",
+                "weight_g": 1000
+            }
+        ]
+    },
+    {
+        "id": 43,
+        "name": "Rice & Beans (Mseto)",
+        "calories_per_100g": 193,
+        "protein_per_100g": 5.0,
+        "fat_per_100g": 7.9,
+        "carbs_per_100g": 23.5,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Small Bowl",
+                "weight_g": 200
+            },
+            {
+                "label": "Standard Plate",
+                "weight_g": 350
+            },
+            {
+                "label": "Large Heap",
+                "weight_g": 500
+            }
+        ]
+    },
+    {
+        "id": 44,
+        "name": "Margarine (Blueband)",
+        "calories_per_100g": 748,
+        "protein_per_100g": 0.1,
+        "fat_per_100g": 83.0,
+        "carbs_per_100g": 0.0,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Teaspoon",
+                "weight_g": 5
+            },
+            {
+                "label": "Tablespoon",
+                "weight_g": 15
+            },
+            {
+                "label": "Thick Spread",
+                "weight_g": 30
+            }
+        ]
+    },
+    {
+        "id": 45,
+        "name": "Peanut Butter",
+        "calories_per_100g": 593,
+        "protein_per_100g": 20.1,
+        "fat_per_100g": 48.4,
+        "carbs_per_100g": 15.0,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Teaspoon",
+                "weight_g": 10
+            },
+            {
+                "label": "Tablespoon",
+                "weight_g": 20
+            },
+            {
+                "label": "Scoop",
+                "weight_g": 40
+            }
+        ]
+    },
+    {
+        "id": 46,
+        "name": "Green Maize (Boiled)",
+        "calories_per_100g": 146,
+        "protein_per_100g": 3.8,
+        "fat_per_100g": 2.3,
+        "carbs_per_100g": 20.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 150,
+            "label": "Cobs"
+        },
+        "portions": [
+            {
+                "label": "Half Cob",
+                "weight_g": 75
+            },
+            {
+                "label": "One Cob",
+                "weight_g": 150
+            },
+            {
+                "label": "Large Cob",
+                "weight_g": 200
+            }
+        ]
+    },
+    {
+        "id": 47,
+        "name": "Carrots (Boiled)",
+        "calories_per_100g": 35,
+        "protein_per_100g": 0.8,
+        "fat_per_100g": 0.2,
+        "carbs_per_100g": 8.2,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Small Portion",
+                "weight_g": 50
+            },
+            {
+                "label": "Standard Cup",
+                "weight_g": 80
+            },
+            {
+                "label": "Large Bowl",
+                "weight_g": 150
+            }
+        ]
+    },
+    {
+        "id": 48,
+        "name": "Indomie (Chicken Flavor)",
+        "calories_per_100g": 457,
+        "protein_per_100g": 10.0,
+        "fat_per_100g": 17.0,
+        "carbs_per_100g": 64.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 70,
+            "label": "Packs"
+        },
+        "portions": [
+            {
+                "label": "1 Pack (Small)",
+                "weight_g": 70
+            },
+            {
+                "label": "2 Packs (Standard)",
+                "weight_g": 140
+            },
+            {
+                "label": "3 Packs (Large)",
+                "weight_g": 210
+            }
+        ]
     }
 ]

@@ -1,5 +1,5 @@
-Flask
-google-generativeai
-python-dotenv
-Pillow
-gunicorn
+Flask==3.1.2
+google-generativeai==0.8.5
+python-dotenv==1.0.0
+Pillow==12.0.0
+gunicorn==23.0.0
