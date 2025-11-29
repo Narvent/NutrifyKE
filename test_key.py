@@ -2,7 +2,7 @@ import google.generativeai as genai
 import sys
 
 # --- PASTE YOUR REAL KEY INSIDE THE QUOTES BELOW ---
-GEMINI_API_KEY = "AIzaSyAa5ylWK_NsZ-bSuIjB2a-4LhUuLyyNXqE" 
+GEMINI_API_KEY = "AIzaSyDkPpbplBpJY8IsjDzH5f-LBQH_kj_hUQ4" 
 
 # ---------------------------------------------------
 

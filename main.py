@@ -81,6 +81,18 @@ def analyze_image():
         # 1. Convert the uploaded file to a format Gemini understands
         image = Image.open(file.stream)
 
+        # --- OPTIMIZATION: Resize image to max 1024px to prevent Vercel 4.5MB limit ---
+        # Convert to RGB to handle PNG alpha channels correctly
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+            
+        # Resize if larger than 1024px
+        max_size = 1024
+        if image.width > max_size or image.height > max_size:
+            image.thumbnail((max_size, max_size))
+            print(f"Image resized to {image.width}x{image.height}")
+        # -----------------------------------------------------------------------------
+
         # 2. Use a smarter prompt that doesn't list all foods
         prompt = """
         You are a nutrition assistant for a Kenyan calorie tracker app.
