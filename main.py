@@ -16,12 +16,12 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY not found in .env file. Please create a .env file with your API key.")
-
-genai.configure(api_key=GEMINI_API_KEY)
-
-# Updated to use the model found in your list
-model = genai.GenerativeModel('gemini-2.5-flash')
+    print("WARNING: GEMINI_API_KEY not found. AI features will not work.")
+    model = None
+else:
+    genai.configure(api_key=GEMINI_API_KEY)
+    # Use the correct stable model name
+    model = genai.GenerativeModel('gemini-1.5-flash')
 
 # Load local data on startup
 utils.load_data()
@@ -61,6 +61,13 @@ def calculate():
 @app.route('/analyze', methods=['POST'])
 def analyze_image():
     print("--- PHOTO RECEIVED (MULTI-FOOD MODE) ---")
+    
+    # Check if AI is configured
+    if model is None:
+        return jsonify({
+            "status": "error",
+            "error": "AI service not configured. Please contact support."
+        }), 503
     
     if 'image' not in request.files:
         return jsonify({"error": "No image part"}), 400
