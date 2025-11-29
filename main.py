@@ -20,8 +20,8 @@ if not GEMINI_API_KEY:
     model = None
 else:
     genai.configure(api_key=GEMINI_API_KEY)
-    # Use gemini-2.5-flash-image (optimized for image recognition)
-    model = genai.GenerativeModel('gemini-2.5-flash-image')
+    # Use gemini-2.5-flash (latest model with credits)
+    model = genai.GenerativeModel('gemini-2.5-flash')
 
 # Load local data on startup
 utils.load_data()
