@@ -81,28 +81,24 @@ def analyze_image():
         # 1. Convert the uploaded file to a format Gemini understands
         image = Image.open(file.stream)
 
-        # 2. Build a list of available foods for better matching
-        food_names = [f"{item['name']}" for item in utils.FOOD_DATA]
-        food_list_str = ", ".join(food_names)
-
-        # 3. Ask Gemini to identify ALL foods in the image
-        prompt = f"""
+        # 2. Use a smarter prompt that doesn't list all foods
+        prompt = """
         You are a nutrition assistant for a Kenyan calorie tracker app.
         
-        TASK: Identify ALL foods visible in this image. If there are multiple items (e.g., Rice AND Beef Stew), list them separately.
+        TASK: Identify ALL Kenyan foods visible in this image.
         
-        Available foods in database:
-        [{food_list_str}]
+        Common Kenyan foods include: Ugali, Chapati, Rice, Githeri, Sukuma Wiki, Nyama Choma, 
+        Pilau, Mandazi, Beans, Chicken, Fish, Beef Stew, Vegetables, etc.
         
         Return ONLY a raw JSON ARRAY (list). Do not use Markdown formatting or code blocks.
-        Each item in the array should have:
-        - "food_name": The exact string from the list above that best matches.
-        - "estimated_servings": A number (float) representing the portion size (e.g. 1.0 for standard, 0.5 for half).
+        Each item should have:
+        - "food_name": The name of the food (be specific, e.g., "Ugali", "Chapati", "Rice", "Beef Stew")
+        - "estimated_servings": A number representing portion size (1.0 = standard, 0.5 = half, 2.0 = double)
         
         Example JSON:
         [
-          {{ "food_name": "Rice (Plain White Boiled)", "estimated_servings": 1.0 }},
-          {{ "food_name": "Beef Stew", "estimated_servings": 0.5 }}
+          { "food_name": "Ugali", "estimated_servings": 1.0 },
+          { "food_name": "Beef Stew", "estimated_servings": 0.5 }
         ]
         
         If only ONE food is visible, still return an array with one item.
