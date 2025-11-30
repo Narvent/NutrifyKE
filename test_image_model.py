@@ -10,10 +10,10 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 genai.configure(api_key=GEMINI_API_KEY)
 
-print("Testing gemini-2.5-flash-image model...")
+print("Testing gemini-3-pro-preview model...")
 
 try:
-    model = genai.GenerativeModel('gemini-2.5-flash-image')
+    model = genai.GenerativeModel('gemini-3-pro-preview')
     
     # Download a test food image
     url = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400"
@@ -23,17 +23,17 @@ try:
     prompt = "What food is in this image? Be specific."
     result = model.generate_content([prompt, img])
     
-    print("✓ SUCCESS! Model works!")
+    print("SUCCESS! Model works!")
     print(f"AI Response: {result.text}")
     
 except Exception as e:
-    print(f"✗ FAILED: {e}")
-    print("\nTrying gemini-2.5-flash instead...")
+    print(f"FAILED: {e}")
+    print("\nTrying gemini-3-pro-preview (fallback) instead...")
     
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-3-pro-preview')
         result = model.generate_content([prompt, img])
-        print("✓ gemini-2.5-flash works!")
+        print("gemini-3-pro-preview works!")
         print(f"AI Response: {result.text}")
     except Exception as e2:
-        print(f"✗ Also failed: {e2}")
+        print(f"Also failed: {e2}")

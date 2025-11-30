@@ -22,7 +22,7 @@ try:
     genai.configure(api_key=GEMINI_API_KEY)
     
     # 3. Test the model
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    model = genai.GenerativeModel('gemini-3-pro-preview')
     response = model.generate_content("Reply with the word SUCCESS if you hear me.")
     
     print(f"Gemini says: {response.text}")

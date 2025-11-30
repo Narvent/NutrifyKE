@@ -20,8 +20,8 @@ if not GEMINI_API_KEY:
     model = None
 else:
     genai.configure(api_key=GEMINI_API_KEY)
-    # Use gemini-2.5-flash (latest model with credits)
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    # Use gemini-3-pro-preview (latest available model)
+    model = genai.GenerativeModel('gemini-3-pro-preview')
 
 # Load local data on startup
 utils.load_data()
