@@ -1,21 +1,24 @@
 import google.generativeai as genai
 import sys
 
-# --- PASTE YOUR REAL KEY INSIDE THE QUOTES BELOW ---
-GEMINI_API_KEY = "AIzaSyDkPpbplBpJY8IsjDzH5f-LBQH_kj_hUQ4" 
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 # ---------------------------------------------------
 
-# 1. Check if you actually followed instructions
-if GEMINI_API_KEY == "":
-    print("ERROR: The variable GEMINI_API_KEY is empty.")
-    print("You must paste your AIza... key inside the quotes on line 5.")
+# 1. Check if key exists
+if not GEMINI_API_KEY:
+    print("ERROR: GEMINI_API_KEY not found in environment variables.")
     sys.exit()
 
 print(f"Testing Key: {GEMINI_API_KEY[:5]}... (hidden)")
 
 try:
-    # 2. Configure Gemini with YOUR variable name
+    # 2. Configure Gemini
     genai.configure(api_key=GEMINI_API_KEY)
     
     # 3. Test the model

@@ -3,8 +3,11 @@ from PIL import Image
 import requests
 from io import BytesIO
 
-# Your API key
-GEMINI_API_KEY = "AIzaSyDkPpbplBpJY8IsjDzH5f-LBQH_kj_hUQ4"
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 genai.configure(api_key=GEMINI_API_KEY)
 
 print("Testing gemini-2.5-flash-image model...")
