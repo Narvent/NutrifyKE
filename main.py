@@ -93,117 +93,98 @@ def analyze_image():
             print(f"Image resized to {image.width}x{image.height}")
         # -----------------------------------------------------------------------------
 
-        # 2. Use a smarter prompt that doesn't list all foods
+        # 2. Use the new Container-Aware System Prompt
         prompt = """
-        You are a nutrition assistant for a Kenyan calorie tracker app.
+        You are an expert Kenyan Nutrition AI. Analyze the image for food intake.
+
+        Step 1: Detect the Container & Layout
+        - Is the food on a flat surface (plate, board, table)? -> Mode: COUNT.
+        - Is the food in a deep vessel (sufuria, bakuli, pot, tupperware, cup)? -> Mode: VOLUME.
+
+        Step 2: Analyze Quantity based on Mode
+        - If COUNT: Count visible items. Strictly check for stacking/piles. If items overlap significantly or form a heap (like a pile of mandazis/samosas), set is_stacked to true.
+        - If VOLUME: Identify the container type (e.g., 'standard_bowl', 'sufuria'). Estimate fullness from 0.0 to 1.0 (where 1.0 is brim-full).
+
+        Step 3: Return strict JSON
+        {
+          "food_name": "string (e.g. Beef Samosa)",
+          "confidence": float,
+          "layout": {
+            "mode": "count" | "volume",
+            "container_type": "plate" | "sufuria" | "bowl" | "hand",
+            "is_stacked": boolean (True if pile detected),
+            "visible_count": integer (null if volume mode),
+            "fullness_index": float (0.0-1.0, null if count mode)
+          }
+        }
         
-        TASK: Identify ALL Kenyan foods visible in this image.
-        
-        Common Kenyan foods include: Ugali, Chapati, Rice, Githeri, Sukuma Wiki, Nyama Choma, 
-        Pilau, Mandazi, Beans, Chicken, Fish, Beef Stew, Vegetables, etc.
-        
-        Return ONLY a raw JSON ARRAY (list). Do not use Markdown formatting or code blocks.
-        Each item should have:
-        - "food_name": The name of the food (be specific, e.g., "Ugali", "Chapati", "Rice", "Beef Stew")
-        - "estimated_servings": A number representing portion size (1.0 = standard, 0.5 = half, 2.0 = double)
-        
-        Example JSON:
-        [
-          { "food_name": "Ugali", "estimated_servings": 1.0 },
-          { "food_name": "Beef Stew", "estimated_servings": 0.5 }
-        ]
-        
-        If only ONE food is visible, still return an array with one item.
+        Return ONLY the raw JSON object. Do not use Markdown formatting.
         """
 
         response = model.generate_content([prompt, image])
         
-        # 4. Robust JSON Extraction (handles both array and object responses)
+        # 4. Robust JSON Extraction
         raw_text = response.text.strip()
         print(f"AI Raw Response: {raw_text[:200]}...")
         
-        # Try to extract JSON array first
-        json_match = re.search(r'\[.*\]', raw_text, re.DOTALL)
+        # Try to extract JSON object
+        json_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
         
-        # If no array found, try to extract object and wrap it in array
         if not json_match:
-            json_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
-            if json_match:
-                # Wrap single object in array
-                clean_json_str = '[' + json_match.group(0) + ']'
-            else:
-                print("AI Output was not valid JSON:", raw_text)
-                return jsonify({"error": "AI failed to return valid JSON"}), 500
-        else:
-            clean_json_str = json_match.group(0)
-        
-        ai_results = json.loads(clean_json_str)
-        
-        # Ensure it's a list
-        if not isinstance(ai_results, list):
-            ai_results = [ai_results]
-        
-        print(f"AI Detected {len(ai_results)} food item(s)")
-        
-        # 5. Process each detected food
-        foods_found = []
-        
-        for ai_item in ai_results:
-            detected_name = ai_item.get('food_name', '').strip()
-            estimated_servings = ai_item.get('estimated_servings', 1.0)
+            print("AI Output was not valid JSON:", raw_text)
+            return jsonify({"error": "AI failed to return valid JSON"}), 500
             
-            print(f"Processing: '{detected_name}' ({estimated_servings} servings)")
-            
-            # 6. SMART FUZZY MATCHING LOGIC
-            matched_food = None
-            search_term = detected_name.lower()
+        clean_json_str = json_match.group(0)
+        ai_result = json.loads(clean_json_str)
+        
+        print(f"AI Analysis: {ai_result}")
+        
+        # 5. Match the food name to our database
+        detected_name = ai_result.get('food_name', '').strip()
+        matched_food = None
+        search_term = detected_name.lower()
 
-            # Step A: Exact Match (Case Insensitive)
+        # Step A: Exact Match (Case Insensitive)
+        for item in utils.FOOD_DATA:
+            if item['name'].lower() == search_term:
+                matched_food = item
+                break
+        
+        # Step B: AI name is INSIDE Database name
+        if not matched_food:
             for item in utils.FOOD_DATA:
-                if item['name'].lower() == search_term:
+                db_name = item['name'].lower()
+                if search_term in db_name:
                     matched_food = item
                     break
-            
-            # Step B: AI name is INSIDE Database name
-            if not matched_food:
-                for item in utils.FOOD_DATA:
-                    db_name = item['name'].lower()
-                    if search_term in db_name:
-                        matched_food = item
-                        break
-            
-            # Step C: Database name is INSIDE AI name
-            if not matched_food:
-                for item in utils.FOOD_DATA:
-                    db_name = item['name'].lower()
-                    if db_name in search_term and len(db_name) > 3:
-                        matched_food = item
-                        break
-
-            if not matched_food:
-                print(f"WARNING: Could not match '{detected_name}' - skipping")
-                continue
-            
-            print(f"✓ Matched: {matched_food['name']} (ID: {matched_food['id']})")
-            
-            # 7. Calculate nutrition using utils.calculate_meal
-            meal_data = utils.calculate_meal(matched_food['id'], estimated_servings)
-            
-            if meal_data:
-                foods_found.append(meal_data)
         
-        # 8. Return the list of all detected foods
-        if not foods_found:
+        # Step C: Database name is INSIDE AI name
+        if not matched_food:
+            for item in utils.FOOD_DATA:
+                db_name = item['name'].lower()
+                if db_name in search_term and len(db_name) > 3:
+                    matched_food = item
+                    break
+
+        if not matched_food:
             return jsonify({
                 "status": "error",
-                "error": "No foods could be matched from the image"
+                "error": f"Could not match food '{detected_name}' to database."
             }), 404
         
-        print(f"SUCCESS: Returning {len(foods_found)} food(s)")
+        print(f"✓ Matched: {matched_food['name']} (ID: {matched_food['id']})")
         
+        # 6. Return the analysis + matched food details
         return jsonify({
             "status": "success",
-            "foods_found": foods_found
+            "analysis": ai_result,
+            "matched_food": {
+                "id": matched_food['id'],
+                "name": matched_food['name'],
+                "calories_per_100g": matched_food['calories_per_100g'],
+                "manual_unit": matched_food.get('manual_unit'),
+                "portions": matched_food.get('portions', [])
+            }
         })
 
     except Exception as e:

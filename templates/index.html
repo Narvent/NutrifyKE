@@ -185,6 +185,112 @@
         </svg>
     </button>
 
+    <!-- Camera Tip -->
+    <div id="camera-tip"
+        class="fixed bottom-24 right-6 z-40 bg-black/80 text-white text-xs py-2 px-4 rounded-full backdrop-blur-sm shadow-lg hidden animate-fade-in">
+        💡 Tip: For best results, capture the plate, not the whole pot.
+    </div>
+
+    <!-- Verification Modal -->
+    <div id="verification-modal"
+        class="fixed inset-0 bg-black/80 z-[70] hidden flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+            <!-- Header -->
+            <div class="bg-primary p-4 text-white">
+                <h3 class="text-lg font-bold flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Confirm Details
+                </h3>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6">
+                <p class="text-gray-600 mb-4" id="modal-message">The AI detected something.</p>
+
+                <!-- Stack Adjuster UI (Scenario B) -->
+                <div id="stack-adjuster" class="hidden">
+                    <div class="flex items-center justify-center space-x-4 mb-6">
+                        <button onclick="adjustStack(-1)"
+                            class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xl font-bold text-gray-600">-</button>
+                        <span id="stack-count" class="text-4xl font-extrabold text-primary">1</span>
+                        <button onclick="adjustStack(1)"
+                            class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xl font-bold text-gray-600">+</button>
+                    </div>
+                    <button onclick="confirmStackCount()"
+                        class="w-full bg-primary hover:bg-green-600 text-white font-bold py-3 rounded-lg shadow transition">
+                        Confirm Count
+                    </button>
+                </div>
+
+                <!-- Portion Selector UI (Scenario C) -->
+                <div id="portion-selector" class="hidden space-y-3">
+                    <button onclick="selectPortion('small')"
+                        class="w-full flex items-center justify-between p-4 border-2 border-gray-100 rounded-xl hover:border-primary hover:bg-green-50 transition group">
+                        <div class="flex items-center">
+                            <div
+                                class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-3 group-hover:bg-white">
+                                S</div>
+                            <div class="text-left">
+                                <p class="font-bold text-gray-800">Small Bowl</p>
+                                <p class="text-xs text-gray-500">Approx. 300g</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-300 group-hover:text-primary" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
+                    </button>
+
+                    <button onclick="selectPortion('standard')"
+                        class="w-full flex items-center justify-between p-4 border-2 border-gray-100 rounded-xl hover:border-primary hover:bg-green-50 transition group">
+                        <div class="flex items-center">
+                            <div
+                                class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-3 group-hover:bg-white">
+                                M</div>
+                            <div class="text-left">
+                                <p class="font-bold text-gray-800">Standard Plate</p>
+                                <p class="text-xs text-gray-500">Approx. 500g</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-300 group-hover:text-primary" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
+                    </button>
+
+                    <button onclick="selectPortion('large')"
+                        class="w-full flex items-center justify-between p-4 border-2 border-gray-100 rounded-xl hover:border-primary hover:bg-green-50 transition group">
+                        <div class="flex items-center">
+                            <div
+                                class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-3 group-hover:bg-white">
+                                L</div>
+                            <div class="text-left">
+                                <p class="font-bold text-gray-800">Large / Heaped</p>
+                                <p class="text-xs text-gray-500">Approx. 800g+</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-300 group-hover:text-primary" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-gray-50 p-4 border-t border-gray-100 text-center">
+                <button onclick="closeModal()" class="text-sm text-gray-500 hover:text-gray-700 font-medium">Cancel
+                    Analysis</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loading-overlay"
         class="fixed inset-0 bg-black/90 z-[60] hidden flex flex-col items-center justify-center backdrop-blur-sm transition-opacity duration-300">
@@ -442,15 +548,22 @@
                 remainingElement.textContent = `${Math.round(remaining)} kcal remaining`;
                 remainingElement.className = 'text-sm font-bold text-green-600';
             } else {
-                remainingElement.textContent = `${Math.round(Math.abs(remaining))} kcal OVER LIMIT!`;
+                remainingElement.textContent = `${Math.round(Math.abs(remaining))} kcal over goal`;
                 remainingElement.className = 'text-sm font-bold text-red-600';
             }
         }
+
+        let currentAnalysis = null; // Store current AI result for modal interactions
 
         async function handleImageUpload(input) {
             if (input.files && input.files[0]) {
                 // Show loading overlay
                 document.getElementById('loading-overlay').classList.remove('hidden');
+
+                // Show Camera Tip
+                const tip = document.getElementById('camera-tip');
+                tip.classList.remove('hidden');
+                setTimeout(() => tip.classList.add('hidden'), 5000);
 
                 const file = input.files[0];
                 const btn = document.querySelector('button[onclick="document.getElementById(\'camera-input\').click()"]');
@@ -508,26 +621,42 @@
 
                     const result = await response.json();
 
-                    if (result.error || result.status === 'error') {
-                        alert(result.error || 'Failed to detect food');
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    } else if (result.status === 'success' && result.foods_found) {
-                        const foodsFound = result.foods_found;
+                    if (result.status === 'success') {
+                        currentAnalysis = result;
+                        const layout = result.analysis.layout;
+                        const foodName = result.matched_food.name;
 
-                        foodsFound.forEach(meal => {
-                            addMealToLog(meal, meal.input_quantity || '1 serving');
-                        });
+                        // --- SCENARIO LOGIC ---
 
-                        const foodNames = foodsFound.map(f => f.name).join(', ');
-                        btn.innerHTML = `<span class="text-green-600 font-bold">✓ Logged: ${foodNames}</span>`;
+                        // Scenario A: Clear Count (Auto-Log)
+                        if (layout.mode === 'count' && !layout.is_stacked) {
+                            const count = layout.visible_count || 1;
+                            logVerifiedMeal(count);
 
-                        setTimeout(() => {
+                            btn.innerHTML = `<span class="text-green-600 font-bold">✓ Auto-Logged: ${count} ${foodName}</span>`;
+                            setTimeout(() => {
+                                btn.innerHTML = originalText;
+                                btn.disabled = false;
+                            }, 3000);
+                        }
+                        // Scenario B: Stacked (Show Adjuster)
+                        else if (layout.mode === 'count' && layout.is_stacked) {
+                            showVerificationModal('stack', foodName, layout.visible_count || 1);
                             btn.innerHTML = originalText;
                             btn.disabled = false;
-                        }, 3000);
+                        }
+                        // Scenario C: Volume (Show Portion Selector)
+                        else if (layout.mode === 'volume') {
+                            showVerificationModal('volume', foodName, null, layout.container_type);
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        } else {
+                            // Fallback
+                            logVerifiedMeal(1);
+                        }
+
                     } else {
-                        alert("Unexpected response format from server.");
+                        alert(result.error || 'Failed to detect food');
                         btn.innerHTML = originalText;
                         btn.disabled = false;
                     }
@@ -542,6 +671,85 @@
                     input.value = ''; // Reset input
                 }
             }
+        }
+
+        // --- VERIFICATION MODAL LOGIC ---
+
+        function showVerificationModal(mode, foodName, initialCount = 1, containerType = 'container') {
+            const modal = document.getElementById('verification-modal');
+            const message = document.getElementById('modal-message');
+            const stackUI = document.getElementById('stack-adjuster');
+            const volumeUI = document.getElementById('portion-selector');
+            const stackCount = document.getElementById('stack-count');
+
+            modal.classList.remove('hidden');
+
+            if (mode === 'stack') {
+                message.innerHTML = `I counted <b>${initialCount} visible ${foodName}</b>, but this looks like a stack.<br>Adjust the total if needed:`;
+                stackUI.classList.remove('hidden');
+                volumeUI.classList.add('hidden');
+                stackCount.textContent = initialCount;
+                stackCount.dataset.value = initialCount;
+            } else if (mode === 'volume') {
+                message.innerHTML = `Detected <b>${foodName}</b> in a <b>${containerType}</b>.<br>Select portion size:`;
+                stackUI.classList.add('hidden');
+                volumeUI.classList.remove('hidden');
+            }
+        }
+
+        function adjustStack(delta) {
+            const display = document.getElementById('stack-count');
+            let val = parseInt(display.dataset.value) || 1;
+            val += delta;
+            if (val < 1) val = 1;
+            display.textContent = val;
+            display.dataset.value = val;
+        }
+
+        function confirmStackCount() {
+            const count = parseInt(document.getElementById('stack-count').dataset.value);
+            logVerifiedMeal(count);
+            closeModal();
+        }
+
+        function selectPortion(size) {
+            let quantity = 1.0;
+            if (size === 'small') quantity = 0.6; // ~300g (assuming standard is 500g)
+            if (size === 'standard') quantity = 1.0; // ~500g
+            if (size === 'large') quantity = 1.6; // ~800g
+
+            logVerifiedMeal(quantity);
+            closeModal();
+        }
+
+        function closeModal() {
+            document.getElementById('verification-modal').classList.add('hidden');
+            currentAnalysis = null;
+        }
+
+        function logVerifiedMeal(quantity) {
+            if (!currentAnalysis) return;
+
+            const food = currentAnalysis.matched_food;
+
+            // Optimistic UI update
+            const tempMeal = {
+                name: food.name,
+                calories: (food.calories_per_100g * quantity), // Rough estimate
+                protein_g: 0, fat_g: 0, carbs_g: 0
+            };
+
+            // Call backend to get precise macros
+            fetch(`/calculate?id=${food.id}&quantity=${quantity}`)
+                .then(res => res.json())
+                .then(mealData => {
+                    addMealToLog(mealData, quantity);
+                })
+                .catch(err => {
+                    console.error("Calculation error", err);
+                    alert("Logged, but failed to calculate precise macros.");
+                    addMealToLog(tempMeal, quantity);
+                });
         }
 
         window.addEventListener('DOMContentLoaded', init);
