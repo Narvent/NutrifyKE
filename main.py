@@ -108,7 +108,7 @@ def analyze_image():
         Step 3: Return strict JSON
         {
           "food_name": "string (e.g. Beef Samosa)",
-          "confidence": float,
+          "nutritional_info": { "calories": int, "protein": int, "carbs": int, "fat": int },
           "layout": {
             "mode": "count" | "volume",
             "container_type": "plate" | "sufuria" | "bowl" | "hand",
@@ -127,65 +127,69 @@ def analyze_image():
         raw_text = response.text.strip()
         print(f"AI Raw Response: {raw_text[:200]}...")
         
-        # Try to extract JSON object
-        json_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
+        # Clean markdown backticks if present
+        if raw_text.startswith("```json"):
+            raw_text = raw_text[7:]
+        if raw_text.startswith("```"):
+            raw_text = raw_text[3:]
+        if raw_text.endswith("```"):
+            raw_text = raw_text[:-3]
         
-        if not json_match:
-            print("AI Output was not valid JSON:", raw_text)
-            return jsonify({"error": "AI failed to return valid JSON"}), 500
-            
-        clean_json_str = json_match.group(0)
-        ai_result = json.loads(clean_json_str)
+        raw_text = raw_text.strip()
+
+        # Try to extract JSON object using regex as a fallback
+        json_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
+        if json_match:
+            raw_text = json_match.group(0)
+        
+        try:
+            ai_result = json.loads(raw_text)
+        except json.JSONDecodeError as e:
+            print(f"JSON Parse Error: {e}")
+            print(f"Faulty JSON: {raw_text}")
+            return jsonify({"error": "Failed to parse AI response", "raw_data": raw_text}), 400
         
         print(f"AI Analysis: {ai_result}")
         
-        # 5. Match the food name to our database
-        detected_name = ai_result.get('food_name', '').strip()
-        matched_food = None
-        search_term = detected_name.lower()
+        # 5. Safe Extraction with Defaults
+        food_name = ai_result.get('food_name', 'Unknown Food')
+        nutrition = ai_result.get('nutritional_info', {})
+        layout = ai_result.get('layout', {})
 
-        # Step A: Exact Match (Case Insensitive)
+        # 6. Match the food name to our database (Optional but good for consistency)
+        # We will use the AI provided nutrition if available, otherwise fallback to DB
+        matched_food = None
+        search_term = food_name.lower()
+
+        # Try to find in DB to get ID and other metadata
         for item in utils.FOOD_DATA:
             if item['name'].lower() == search_term:
                 matched_food = item
                 break
         
-        # Step B: AI name is INSIDE Database name
         if not matched_food:
-            for item in utils.FOOD_DATA:
-                db_name = item['name'].lower()
-                if search_term in db_name:
-                    matched_food = item
-                    break
-        
-        # Step C: Database name is INSIDE AI name
-        if not matched_food:
-            for item in utils.FOOD_DATA:
-                db_name = item['name'].lower()
-                if db_name in search_term and len(db_name) > 3:
+             for item in utils.FOOD_DATA:
+                if search_term in item['name'].lower():
                     matched_food = item
                     break
 
-        if not matched_food:
-            return jsonify({
-                "status": "error",
-                "error": f"Could not match food '{detected_name}' to database."
-            }), 404
-        
-        print(f"✓ Matched: {matched_food['name']} (ID: {matched_food['id']})")
-        
-        # 6. Return the analysis + matched food details
-        return jsonify({
+        # Construct the response
+        response_data = {
             "status": "success",
             "analysis": ai_result,
             "matched_food": {
-                "id": matched_food['id'],
-                "name": matched_food['name'],
-                "calories_per_100g": matched_food['calories_per_100g'],
-                "manual_unit": matched_food.get('manual_unit'),
-                "portions": matched_food.get('portions', [])
+                "id": matched_food['id'] if matched_food else 999, # 999 for unknown
+                "name": food_name,
+                "calories_per_100g": nutrition.get('calories', 0), # Use AI estimate or 0
+                "protein_g": nutrition.get('protein', 0),
+                "carbs_g": nutrition.get('carbs', 0),
+                "fat_g": nutrition.get('fat', 0),
+                "manual_unit": matched_food.get('manual_unit') if matched_food else "serving",
+                "portions": matched_food.get('portions', []) if matched_food else []
             }
-        })
+        }
+        
+        return jsonify(response_data)
 
     except Exception as e:
         print(f"CRITICAL ERROR: {e}")
