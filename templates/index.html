@@ -555,6 +555,52 @@
 
         let currentAnalysis = null; // Store current AI result for modal interactions
 
+        async function compressImage(file, { quality = 0.7, maxWidth = 1024, maxHeight = 1024, type = 'image/jpeg' } = {}) {
+            return new Promise((resolve, reject) => {
+                const image = new Image();
+                image.src = URL.createObjectURL(file);
+                image.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = image.width;
+                    let height = image.height;
+
+                    // Calculate new dimensions
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width = Math.round((width * maxHeight) / height);
+                            height = maxHeight;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(image, 0, 0, width, height);
+
+                    // Convert to Blob
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            reject(new Error('Canvas is empty'));
+                            return;
+                        }
+                        // Determine which is smaller: original or compressed
+                        if (blob.size > file.size) {
+                            resolve(file); // Don't make it bigger!
+                        } else {
+                            resolve(blob);
+                        }
+                        URL.revokeObjectURL(image.src); // Cleanup memory
+                    }, type, quality);
+                };
+                image.onerror = (error) => reject(error);
+            });
+        }
+
         async function handleImageUpload(input) {
             if (input.files && input.files[0]) {
                 // Show loading overlay
@@ -573,40 +619,9 @@
 
                 try {
                     // --- CLIENT-SIDE COMPRESSION ---
-                    const compressedBlob = await new Promise((resolve, reject) => {
-                        const img = new Image();
-                        img.src = URL.createObjectURL(file);
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            let width = img.width;
-                            let height = img.height;
-                            const maxSize = 1024;
-
-                            // Resize logic
-                            if (width > height) {
-                                if (width > maxSize) {
-                                    height *= maxSize / width;
-                                    width = maxSize;
-                                }
-                            } else {
-                                if (height > maxSize) {
-                                    width *= maxSize / height;
-                                    height = maxSize;
-                                }
-                            }
-
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
-
-                            // Compress to JPEG with 0.7 quality
-                            canvas.toBlob((blob) => {
-                                resolve(blob);
-                            }, 'image/jpeg', 0.7);
-                        };
-                        img.onerror = (e) => reject(e);
-                    });
+                    console.log(`Original size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+                    const compressedBlob = await compressImage(file);
+                    console.log(`Compressed size: ${(compressedBlob.size / 1024 / 1024).toFixed(2)} MB`);
                     // -------------------------------
 
                     const formData = new FormData();
