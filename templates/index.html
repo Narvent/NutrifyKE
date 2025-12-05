@@ -730,26 +730,27 @@
         function logVerifiedMeal(quantity) {
             if (!currentAnalysis) return;
 
+            // Use the data directly from the AI analysis (Robust Fix)
+            // We use matched_food because main.py populates it with the AI's nutritional_info
             const food = currentAnalysis.matched_food;
+            const nutrition = currentAnalysis.analysis.nutritional_info || {};
 
-            // Optimistic UI update
-            const tempMeal = {
+            // Fallback to matched_food if nutrition is empty (though main.py ensures matched_food has it)
+            const baseCalories = food.calories_per_100g || nutrition.calories || 0;
+            const baseProtein = food.protein_g || nutrition.protein || 0;
+            const baseCarbs = food.carbs_g || nutrition.carbs || 0;
+            const baseFat = food.fat_g || nutrition.fat || 0;
+
+            const mealData = {
                 name: food.name,
-                calories: (food.calories_per_100g * quantity), // Rough estimate
-                protein_g: 0, fat_g: 0, carbs_g: 0
+                calories: baseCalories * quantity,
+                protein_g: baseProtein * quantity,
+                carbs_g: baseCarbs * quantity,
+                fat_g: baseFat * quantity
             };
 
-            // Call backend to get precise macros
-            fetch(`/calculate?id=${food.id}&quantity=${quantity}`)
-                .then(res => res.json())
-                .then(mealData => {
-                    addMealToLog(mealData, quantity);
-                })
-                .catch(err => {
-                    console.error("Calculation error", err);
-                    alert("Logged, but failed to calculate precise macros.");
-                    addMealToLog(tempMeal, quantity);
-                });
+            console.log("📝 Logging Meal (Local Calc):", mealData);
+            addMealToLog(mealData, quantity);
         }
 
         window.addEventListener('DOMContentLoaded', init);
