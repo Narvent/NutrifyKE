@@ -25,6 +25,8 @@ else:
 
 # Load local data on startup
 utils.load_data()
+import database_setup
+database_setup.init_db()
 
 @app.route('/')
 def home():
@@ -35,7 +37,16 @@ def get_foods():
     # Helper to prevent crashes if utils.FOOD_DATA is empty
     if not hasattr(utils, 'FOOD_DATA'):
         utils.load_data()
-    foods = [{"id": item["id"], "name": item["name"]} for item in utils.FOOD_DATA]
+    foods = []
+    for item in utils.FOOD_DATA:
+        foods.append({
+            "id": item["id"], 
+            "name": item["name"],
+            "serving_type": item.get("serving_type", "volumetric"),
+            "standard_unit_weight": item.get("standard_unit_weight"),
+            "components": item.get("components", []),
+            "portions": item.get("portions", [])
+        })
     return jsonify(foods)
 
 @app.route('/search')
@@ -46,16 +57,97 @@ def search():
     results = utils.search_food(query)
     return jsonify(results)
 
-@app.route('/calculate')
+@app.route('/calculate', methods=['POST'])
 def calculate():
-    food_id = request.args.get('id', type=int)
-    quantity = request.args.get('quantity', type=float)
+    # CHANGED: Read from JSON body instead of URL parameters
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({"error": "Missing JSON body"}), 400
+
+    food_id = data.get('id')
+    quantity = data.get('quantity')
+    serving_type = data.get('serving_type', 'volumetric') # Default to volumetric
+    
     if food_id is None or quantity is None:
         return jsonify({"error": "Missing parameters"}), 400
+
+    # Quantity handling (already robust, but ensuring it works with JSON types)
+    # If quantity is a string (legacy), try to parse it. If it's already a number/dict, use as is.
+    if isinstance(quantity, str):
+        try:
+            quantity = json.loads(quantity)
+        except:
+            try:
+                quantity = float(quantity)
+            except:
+                return jsonify({"error": "Invalid quantity format"}), 400
+    
+    # Pass serving_type if your utils.calculate_meal supports it, 
+    # otherwise utils.calculate_meal likely just needs id and quantity.
+    # Assuming utils.calculate_meal handles the logic based on food_id.
     result = utils.calculate_meal(food_id, quantity)
+    
     if not result:
         return jsonify({"error": "Food not found"}), 404
+        
     return jsonify(result)
+
+# --- DATABASE LOGGING ROUTES ---
+
+@app.route('/api/logs/today', methods=['GET'])
+def get_logs():
+    logs = database_setup.get_todays_logs()
+    
+    # Calculate totals
+    totals = {
+        "calories": sum(l['calories'] for l in logs),
+        "protein": sum(l['protein_g'] for l in logs),
+        "fat": sum(l['fat_g'] for l in logs),
+        "carbs": sum(l['carbs_g'] for l in logs)
+    }
+    
+    return jsonify({
+        "logs": logs,
+        "totals": totals
+    })
+
+@app.route('/api/logs', methods=['POST'])
+def add_log():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Missing data"}), 400
+        
+    try:
+        log_id = database_setup.add_log(
+            food_name=data['name'],
+            calories=data['calories'],
+            protein=data.get('protein_g', 0),
+            fat=data.get('fat_g', 0),
+            carbs=data.get('carbs_g', 0),
+            quantity_label=data.get('input_quantity', '1 serving')
+        )
+        return jsonify({"success": True, "id": log_id})
+    except Exception as e:
+        print(f"Error adding log: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/logs/<int:log_id>', methods=['DELETE'])
+def delete_log(log_id):
+    try:
+        database_setup.delete_log(log_id)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/reset', methods=['POST'])
+def reset_logs():
+    try:
+        database_setup.clear_todays_logs()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 # --- MULTI-FOOD DETECTION ROUTE ---
 @app.route('/analyze', methods=['POST'])
@@ -172,6 +264,24 @@ def analyze_image():
                 if search_term in item['name'].lower():
                     matched_food = item
                     break
+        
+        if not matched_food:
+            # Token Overlap Fallback
+            search_tokens = set(re.findall(r'\w+', search_term.lower()))
+            best_match = None
+            max_overlap = 0
+            
+            for item in utils.FOOD_DATA:
+                item_tokens = set(re.findall(r'\w+', item['name'].lower()))
+                overlap = len(search_tokens.intersection(item_tokens))
+                
+                if overlap > max_overlap:
+                    max_overlap = overlap
+                    best_match = item
+            
+            if best_match and max_overlap > 0:
+                matched_food = best_match
+                print(f"Matched via Token Overlap: {matched_food['name']}")
 
         # Construct the response
         response_data = {
@@ -184,7 +294,9 @@ def analyze_image():
                 "protein_g": nutrition.get('protein', 0),
                 "carbs_g": nutrition.get('carbs', 0),
                 "fat_g": nutrition.get('fat', 0),
-                "manual_unit": matched_food.get('manual_unit') if matched_food else "serving",
+                "serving_type": matched_food.get('serving_type', 'volumetric') if matched_food else 'volumetric',
+                "standard_unit_weight": matched_food.get('standard_unit_weight') if matched_food else None,
+                "components": matched_food.get('components', []) if matched_food else [],
                 "portions": matched_food.get('portions', []) if matched_food else []
             }
         }

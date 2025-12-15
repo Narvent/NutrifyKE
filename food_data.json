@@ -24,7 +24,10 @@
                 "label": "Large (Kibanda Thick)",
                 "weight_g": 150
             }
-        ]
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 90,
+        "components": []
     },
     {
         "id": 2,
@@ -51,7 +54,10 @@
                 "label": "Large (Brick/Plate Full)",
                 "weight_g": 400
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 3,
@@ -78,7 +84,10 @@
                 "label": "Heap (Large)",
                 "weight_g": 450
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 4,
@@ -105,7 +114,10 @@
                 "label": "Large Bowl (Heavy)",
                 "weight_g": 500
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 5,
@@ -132,7 +144,10 @@
                 "label": "Large Heap",
                 "weight_g": 450
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 6,
@@ -159,7 +174,10 @@
                 "label": "Large Bowl",
                 "weight_g": 350
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 7,
@@ -186,7 +204,10 @@
                 "label": "Large Bowl",
                 "weight_g": 250
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 8,
@@ -213,7 +234,10 @@
                 "label": "Large (KDF Block)",
                 "weight_g": 120
             }
-        ]
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 60,
+        "components": []
     },
     {
         "id": 9,
@@ -240,7 +264,10 @@
                 "label": "Large Plate",
                 "weight_g": 500
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 10,
@@ -267,7 +294,10 @@
                 "label": "Large Root",
                 "weight_g": 300
             }
-        ]
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 80,
+        "components": []
     },
     {
         "id": 11,
@@ -294,7 +324,10 @@
                 "label": "Large Serving",
                 "weight_g": 350
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 12,
@@ -321,7 +354,10 @@
                 "label": "Large Bowl",
                 "weight_g": 250
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 13,
@@ -348,7 +384,10 @@
                 "label": "One Large",
                 "weight_g": 120
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 14,
@@ -375,7 +414,10 @@
                 "label": "Large Onion",
                 "weight_g": 100
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 15,
@@ -402,7 +444,10 @@
                 "label": "Packet (500ml)",
                 "weight_g": 500
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 16,
@@ -429,7 +474,10 @@
                 "label": "Large Bowl",
                 "weight_g": 350
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 17,
@@ -456,7 +504,10 @@
                 "label": "3 Eggs",
                 "weight_g": 150
             }
-        ]
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 50,
+        "components": []
     },
     {
         "id": 18,
@@ -483,7 +534,10 @@
                 "label": "Half Chicken",
                 "weight_g": 500
             }
-        ]
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 150,
+        "components": []
     },
     {
         "id": 19,
@@ -510,7 +564,10 @@
                 "label": "Large Platter",
                 "weight_g": 400
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 20,
@@ -537,7 +594,10 @@
                 "label": "Large Serving",
                 "weight_g": 300
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 21,
@@ -564,7 +624,10 @@
                 "label": "Large Fish",
                 "weight_g": 400
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 22,
@@ -591,7 +654,10 @@
                 "label": "Large Piece",
                 "weight_g": 250
             }
-        ]
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 80,
+        "components": []
     },
     {
         "id": 23,
@@ -618,7 +684,10 @@
                 "label": "Large Heap",
                 "weight_g": 350
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 24,
@@ -645,7 +714,10 @@
                 "label": "Large (Brick)",
                 "weight_g": 400
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 25,
@@ -672,7 +744,10 @@
                 "label": "Large Bowl",
                 "weight_g": 500
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 26,
@@ -699,7 +774,10 @@
                 "label": "Large Bowl",
                 "weight_g": 350
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 27,
@@ -726,7 +804,10 @@
                 "label": "Large Bowl",
                 "weight_g": 350
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 28,
@@ -753,7 +834,10 @@
                 "label": "Large Bowl",
                 "weight_g": 350
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 29,
@@ -780,7 +864,10 @@
                 "label": "Large Serving",
                 "weight_g": 250
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 30,
@@ -807,7 +894,10 @@
                 "label": "3 Eggs",
                 "weight_g": 150
             }
-        ]
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 50,
+        "components": []
     },
     {
         "id": 31,
@@ -834,7 +924,10 @@
                 "label": "Cup",
                 "weight_g": 100
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 32,
@@ -861,7 +954,10 @@
                 "label": "Large Bowl",
                 "weight_g": 250
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 33,
@@ -888,7 +984,10 @@
                 "label": "Large Bowl",
                 "weight_g": 250
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 34,
@@ -915,7 +1014,10 @@
                 "label": "Large Bowl",
                 "weight_g": 250
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 35,
@@ -942,7 +1044,10 @@
                 "label": "Large Bowl",
                 "weight_g": 250
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 36,
@@ -969,7 +1074,10 @@
                 "label": "Large Thermos Cup",
                 "weight_g": 500
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 37,
@@ -996,7 +1104,10 @@
                 "label": "3 Samosas",
                 "weight_g": 120
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 38,
@@ -1023,7 +1134,10 @@
                 "label": "Pair (Jumbo)",
                 "weight_g": 80
             }
-        ]
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 30,
+        "components": []
     },
     {
         "id": 39,
@@ -1050,7 +1164,10 @@
                 "label": "Large Banana",
                 "weight_g": 150
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 40,
@@ -1077,7 +1194,10 @@
                 "label": "Whole Avocado",
                 "weight_g": 160
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 41,
@@ -1104,7 +1224,10 @@
                 "label": "Large Bottle (1L)",
                 "weight_g": 1000
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 42,
@@ -1131,7 +1254,10 @@
                 "label": "1 Liter",
                 "weight_g": 1000
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 43,
@@ -1157,6 +1283,22 @@
             {
                 "label": "Large Heap",
                 "weight_g": 500
+            }
+        ],
+        "serving_type": "composite",
+        "standard_unit_weight": null,
+        "components": [
+            {
+                "slug": "rice",
+                "name": "Rice",
+                "serving_type": "volumetric",
+                "standard_unit_weight": null
+            },
+            {
+                "slug": "beans_(mseto)",
+                "name": "Beans (Mseto)",
+                "serving_type": "volumetric",
+                "standard_unit_weight": null
             }
         ]
     },
@@ -1185,7 +1327,10 @@
                 "label": "Thick Spread",
                 "weight_g": 30
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 45,
@@ -1212,7 +1357,10 @@
                 "label": "Scoop",
                 "weight_g": 40
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 46,
@@ -1239,7 +1387,10 @@
                 "label": "Large Cob",
                 "weight_g": 200
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 47,
@@ -1266,7 +1417,10 @@
                 "label": "Large Bowl",
                 "weight_g": 150
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     },
     {
         "id": 48,
@@ -1293,6 +1447,9 @@
                 "label": "3 Packs (Large)",
                 "weight_g": 210
             }
-        ]
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     }
 ]

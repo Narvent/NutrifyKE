@@ -51,49 +51,107 @@ def search_food(query):
             
     return results
 
-def calculate_meal(food_id, quantity):
+def calculate_meal(food_id, quantity_input):
     """
     Calculates the nutrition for a specific food ID and quantity.
-    Returns the specific keys required by index.html (name, protein_g, etc).
+    quantity_input can be:
+      - float/int: for Volumetric (grams) or Countable (pieces)
+      - dict: for Composite ({"component_slug": quantity, ...})
     """
     # 1. Find the food item
-    food = None
-    for item in FOOD_DATA:
-        if item['id'] == food_id:
-            food = item
-            break
-            
+    food = get_food_by_id(food_id)
     if not food:
         return None
 
-    # 2. Calculate the actual weight in grams
-    amount_in_grams = 0
-    unit_label = "grams"
+    serving_type = food.get('serving_type', 'volumetric')
+    standard_unit_weight = food.get('standard_unit_weight')
     
-    # Check if the food uses "pieces" (like Chapati) or "weight" (like Rice)
-    manual_unit = food.get('manual_unit', {})
-    unit_type = manual_unit.get('type', 'weight')
+    total_grams = 0
+    unit_label = ""
+    
+    # --- LOGIC BRANCHING ---
+    
+    if serving_type == 'composite':
+        # Composite Logic: Sum of all components
+        # quantity_input should be a dict: {'chicken_piece': 2, 'chips_portion': 150}
+        
+        # Fallback: If float is passed (e.g. from manual log), assume it's a multiplier for "1 standard serving"
+        # We define "1 standard serving" as 1 unit of each countable component and 150g of each volumetric component.
+        multiplier = 1.0
+        is_simple_multiplier = False
+        
+        if not isinstance(quantity_input, dict):
+            try:
+                multiplier = float(quantity_input)
+                is_simple_multiplier = True
+            except:
+                return None
+            
+        total_calories = 0
+        total_protein = 0
+        total_fat = 0
+        total_carbs = 0
+        component_labels = []
 
-    if unit_type == 'piece':
-        # Logic: User entered number of pieces (e.g. 2 chapatis)
-        weight_per_piece = manual_unit.get('weight_per_unit_g', 100)
-        amount_in_grams = quantity * weight_per_piece
-        unit_label = f"{quantity} {manual_unit.get('label', 'pieces')}"
+        components = food.get('components', [])
+        
+        for comp in components:
+            slug = comp.get('slug')
+            
+            if is_simple_multiplier:
+                # Default logic
+                comp_type = comp.get('serving_type', 'volumetric')
+                if comp_type == 'countable':
+                    q = 1 * multiplier
+                else:
+                    q = 150 * multiplier # Default 150g for volumetric part
+            else:
+                q = quantity_input.get(slug, 0) # Quantity from dict
+            
+            if q > 0:
+                # Calculate weight for this component
+                comp_type = comp.get('serving_type', 'volumetric')
+                comp_weight = 0
+                
+                if comp_type == 'countable':
+                    # q is count, weight = q * unit_weight
+                    u_weight = comp.get('standard_unit_weight', 0)
+                    if not u_weight: u_weight = 100 # Fallback
+                    comp_weight = q * u_weight
+                    component_labels.append(f"{q} x {comp['name']}")
+                else:
+                    # q is weight in grams (volumetric)
+                    comp_weight = q
+                    component_labels.append(f"{comp['name']} ({q}g)")
+                
+                total_grams += comp_weight
+        
+        unit_label = ", ".join(component_labels)
+
+    elif serving_type == 'countable':
+        # Countable Logic: (Input_Count * Standard_Unit_Weight * Calories_Per_100g) / 100
+        try:
+            count = float(quantity_input)
+        except:
+            count = 0
+            
+        weight_per_unit = standard_unit_weight if standard_unit_weight else 100 # Fallback
+        total_grams = count * weight_per_unit
+        unit_label = f"{count} pieces ({total_grams}g)"
+
     else:
-        # Logic: User entered weight or servings
-        if quantity < 15: 
-            # If number is small (e.g. 1.5), assume it's "Servings" of roughly 250g
-            amount_in_grams = quantity * 250 
-            unit_label = f"{quantity} Servings"
-        else:
-            # If number is large (e.g. 300), assume it's "Grams"
-            amount_in_grams = quantity
-            unit_label = f"{quantity}g"
+        # Volumetric Logic: (Selected_Bowl_Weight * Calories_Per_100g) / 100
+        # quantity_input is expected to be the Weight in Grams directly from the UI
+        try:
+            total_grams = float(quantity_input)
+        except:
+            total_grams = 0
+        unit_label = f"{total_grams}g"
 
     # 3. Calculate Macros (The Math)
-    factor = amount_in_grams / 100.0
+    # Using the parent food's macros for the total weight
+    factor = total_grams / 100.0
 
-    # 4. Return Data (Matches index.html expectations)
     return {
         "name": food['name'],
         "calories": round(food['calories_per_100g'] * factor),
