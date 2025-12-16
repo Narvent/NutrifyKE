@@ -12,16 +12,33 @@ app = Flask(__name__)
 
 # --- CONFIGURATION ---
 # Load environment variables from .env file
+# Load environment variables from .env file
 load_dotenv()
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+
+# Support both naming conventions
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
 
 if not GEMINI_API_KEY:
-    print("WARNING: GEMINI_API_KEY not found. AI features will not work.")
+    print("WARNING: GEMINI_API_KEY (or GOOGLE_API_KEY) not found. AI features will not work.")
     model = None
 else:
+    # DEBUG: Print key info to Vercel logs (safe)
+    key_len = len(GEMINI_API_KEY)
+    key_start = GEMINI_API_KEY[:4] if key_len >= 4 else "****"
+    print(f"DEBUG: API Key loaded. Length: {key_len}, Starts with: {key_start}...")
+    
+    # Check for accidental quotes which is a common Vercel error
+    if GEMINI_API_KEY.startswith('"') or GEMINI_API_KEY.startswith("'"):
+        print("CRITICAL WARNING: API Key appears to be quoted! Remove quotes in Vercel.")
+    
     genai.configure(api_key=GEMINI_API_KEY)
-    # Use gemini-3-pro-preview (latest available model)
-    model = genai.GenerativeModel('gemini-3-pro-preview')
+    
+    # Use gemini-3-pro-preview (ensure this model is enabled in your Google Cloud)
+    try:
+        model = genai.GenerativeModel('gemini-3-pro-preview')
+    except Exception as e:
+        print(f"Error initializing model: {e}")
+        model = None
 
 # Load local data on startup
 utils.load_data()
