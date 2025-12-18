@@ -127,7 +127,8 @@ def add_log(food_name, calories, protein, fat, carbs, quantity_label):
     c = conn.cursor()
     
     today = datetime.date.today().isoformat()
-    now_ts = datetime.datetime.now().isoformat()
+    # Use timezone-aware UTC timestamp so frontend can convert to local time
+    now_ts = datetime.datetime.now(datetime.timezone.utc).isoformat()
     
     if db_type == 'postgres':
         # Postgres placeholders are %s
