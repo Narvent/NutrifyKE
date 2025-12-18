@@ -71,6 +71,10 @@ def init_db():
         ''')
         # Check migration for existing tables
         add_column_if_not_exists("daily_logs", "timestamp", "TEXT")
+        add_column_if_not_exists("daily_logs", "quantity_label", "TEXT")
+        add_column_if_not_exists("daily_logs", "protein_g", "REAL")
+        add_column_if_not_exists("daily_logs", "fat_g", "REAL")
+        add_column_if_not_exists("daily_logs", "carbs_g", "REAL")
         
     else:
         # SQLite
@@ -95,6 +99,19 @@ def init_db():
         except sqlite3.OperationalError:
             # Column already exists
             pass
+
+        # Helper for SQLite migrations
+        def add_sqlite_column(col, defn):
+            try:
+                c.execute(f"ALTER TABLE daily_logs ADD COLUMN {col} {defn}")
+                print(f"MIGRATION: Added {col} to daily_logs (SQLite)")
+            except sqlite3.OperationalError:
+                pass
+        
+        add_sqlite_column("quantity_label", "TEXT")
+        add_sqlite_column("protein_g", "REAL")
+        add_sqlite_column("fat_g", "REAL")
+        add_sqlite_column("carbs_g", "REAL")
     
     conn.commit()
     conn.close()
