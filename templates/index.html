@@ -610,6 +610,7 @@
                 const mealData = await response.json();
 
                 // 2. Add to DB
+                // alert("Calculating success. Saving to DB...");
                 await addMealToLog(mealData, quantity + " serving(s)"); // Pass friendly quantity
 
             } catch (error) {
@@ -635,14 +636,18 @@
                     })
                 });
 
-                if (!response.ok) throw new Error("Failed to save log");
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error("Failed to save log: " + errText);
+                }
 
                 // Refresh list from DB
                 await fetchLogs();
+                // alert("Meal saved successfully!");
 
             } catch (e) {
                 console.error(e);
-                alert("Failed to save meal to database.");
+                alert("Error: " + e.message);
             }
         }
 
