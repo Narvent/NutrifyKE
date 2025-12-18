@@ -121,14 +121,17 @@ def init_db():
     else:
         print(f"SUCCESS: Database initialized (Local SQLite: {DB_NAME}).")
 
-def add_log(food_name, calories, protein, fat, carbs, quantity_label):
+def add_log(food_name, calories, protein, fat, carbs, quantity_label, timestamp_iso=None):
     """Adds a new meal log."""
     conn, db_type = get_db_connection()
     c = conn.cursor()
     
     today = datetime.date.today().isoformat()
-    # Use timezone-aware UTC timestamp so frontend can convert to local time
-    now_ts = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    # Use client timestamp if provided, else current UTC equivalent
+    if timestamp_iso:
+        now_ts = timestamp_iso
+    else:
+        now_ts = datetime.datetime.now(datetime.timezone.utc).isoformat()
     
     if db_type == 'postgres':
         # Postgres placeholders are %s

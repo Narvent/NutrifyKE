@@ -139,7 +139,7 @@ def get_logs():
 def add_log():
     data = request.get_json()
     if not data:
-        return jsonify({"error": "Missing data"}), 400
+        return jsonify({"error": "No data provided"}), 400
         
     try:
         log_id = database_setup.add_log(
@@ -148,9 +148,10 @@ def add_log():
             protein=data.get('protein_g', 0),
             fat=data.get('fat_g', 0),
             carbs=data.get('carbs_g', 0),
-            quantity_label=data.get('input_quantity', '1 serving')
+            quantity_label=data.get('quantity_label'),
+            timestamp=data.get('timestamp')  # Pass the client timestamp
         )
-        return jsonify({"success": True, "id": log_id})
+        return jsonify({"success": True, "id": log_id}), 201
     except Exception as e:
         print(f"Error adding log: {e}")
         return jsonify({"error": str(e)}), 500
