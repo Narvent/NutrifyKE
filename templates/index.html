@@ -610,7 +610,7 @@
                 const mealData = await response.json();
 
                 // 2. Add to DB
-                addMealToLog(mealData, quantity + " serving(s)"); // Pass friendly quantity
+                await addMealToLog(mealData, quantity + " serving(s)"); // Pass friendly quantity
 
             } catch (error) {
                 console.warn("Calculation API failed.", error);
