@@ -38,10 +38,21 @@ def get_db_connection():
         return conn, 'sqlite'
 
 def init_db():
-    """Initializes the database table (Dual Mode)."""
+    """Initializes the database table (Dual Mode) and handles migrations."""
     conn, db_type = get_db_connection()
     c = conn.cursor()
     
+    # helper to check column existence (basic migration)
+    def add_column_if_not_exists(table, column, definition):
+        try:
+            c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+            conn.commit()
+            print(f"MIGRATION: Added {column} to {table}")
+        except Exception:
+            # Column likely exists
+            conn.rollback()
+            pass
+
     # Dual Mode SQL Syntax
     if db_type == 'postgres':
         # Postgres (Neon)
@@ -54,9 +65,13 @@ def init_db():
                 fat_g REAL,
                 carbs_g REAL,
                 quantity_label TEXT,
-                date_logged TEXT NOT NULL
+                date_logged TEXT NOT NULL,
+                timestamp TEXT
             );
         ''')
+        # Check migration for existing tables
+        add_column_if_not_exists("daily_logs", "timestamp", "TEXT")
+        
     else:
         # SQLite
         c.execute('''
@@ -68,9 +83,18 @@ def init_db():
                 fat_g REAL,
                 carbs_g REAL,
                 quantity_label TEXT,
-                date_logged TEXT NOT NULL
+                date_logged TEXT NOT NULL,
+                timestamp TEXT
             );
         ''')
+        # Check migration for existing tables
+        try:
+            # SQLite doesn't support IF NOT EXISTS in ALTER TABLE easily, so we try/except
+            c.execute("ALTER TABLE daily_logs ADD COLUMN timestamp TEXT")
+            print("MIGRATION: Added timestamp to daily_logs (SQLite)")
+        except sqlite3.OperationalError:
+            # Column already exists
+            pass
     
     conn.commit()
     conn.close()
@@ -86,30 +110,35 @@ def add_log(food_name, calories, protein, fat, carbs, quantity_label):
     c = conn.cursor()
     
     today = datetime.date.today().isoformat()
+    now_ts = datetime.datetime.now().isoformat()
     
     if db_type == 'postgres':
         # Postgres placeholders are %s
         c.execute('''
-            INSERT INTO daily_logs (food_name, calories, protein_g, fat_g, carbs_g, quantity_label, date_logged)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO daily_logs (food_name, calories, protein_g, fat_g, carbs_g, quantity_label, date_logged, timestamp)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
-        ''', (food_name, calories, protein, fat, carbs, quantity_label, today))
+        ''', (food_name, calories, protein, fat, carbs, quantity_label, today, now_ts))
         log_id = c.fetchone()[0]
     else:
         # SQLite placeholders are ?
         c.execute('''
-            INSERT INTO daily_logs (food_name, calories, protein_g, fat_g, carbs_g, quantity_label, date_logged)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (food_name, calories, protein, fat, carbs, quantity_label, today))
+            INSERT INTO daily_logs (food_name, calories, protein_g, fat_g, carbs_g, quantity_label, date_logged, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (food_name, calories, protein, fat, carbs, quantity_label, today, now_ts))
         log_id = c.lastrowid
     
     conn.commit()
     conn.close()
     return log_id
 
-def get_todays_logs():
-    """Returns all logs for the current date."""
+def get_logs(date_str=None):
+    """Returns logs for a specific date (default: today)."""
     conn, db_type = get_db_connection()
+    
+    # Default to today if no date provided
+    if not date_str:
+        date_str = datetime.date.today().isoformat()
     
     # For Postgres, use RealDictCursor to act like sqlite3.Row
     if db_type == 'postgres':
@@ -119,9 +148,8 @@ def get_todays_logs():
         c = conn.cursor()
         placeholders = '?'
     
-    today = datetime.date.today().isoformat()
-    
-    c.execute(f'SELECT * FROM daily_logs WHERE date_logged = {placeholders} ORDER BY id DESC', (today,))
+    # Sort by timestamp desc, fallback to id desc
+    c.execute(f'SELECT * FROM daily_logs WHERE date_logged = {placeholders} ORDER BY id DESC', (date_str,))
     
     if db_type == 'postgres':
         # RealDictCursor return dicts directly
@@ -147,15 +175,17 @@ def delete_log(log_id):
     conn.commit()
     conn.close()
 
-def clear_todays_logs():
-    """Deletes all logs for today."""
+def clear_logs(date_str=None):
+    """Deletes all logs for a specific date (default: today)."""
     conn, db_type = get_db_connection()
     c = conn.cursor()
     
-    placeholder = '%s' if db_type == 'postgres' else '?'
-    today = datetime.date.today().isoformat()
+    if not date_str:
+        date_str = datetime.date.today().isoformat()
     
-    c.execute(f'DELETE FROM daily_logs WHERE date_logged = {placeholder}', (today,))
+    placeholder = '%s' if db_type == 'postgres' else '?'
+    
+    c.execute(f'DELETE FROM daily_logs WHERE date_logged = {placeholder}', (date_str,))
     
     conn.commit()
     conn.close()

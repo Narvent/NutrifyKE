@@ -12,11 +12,10 @@ app = Flask(__name__)
 
 # --- CONFIGURATION ---
 # Load environment variables from .env file
-# Load environment variables from .env file
 load_dotenv()
 
 # Support both naming conventions
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') 
 
 if not GEMINI_API_KEY:
     print("WARNING: GEMINI_API_KEY (or GOOGLE_API_KEY) not found. AI features will not work.")
@@ -89,6 +88,12 @@ def calculate():
     if food_id is None or quantity is None:
         return jsonify({"error": "Missing parameters"}), 400
 
+    # FIX: Ensure food_id is an integer (frontend sends string)
+    try:
+        food_id = int(food_id)
+    except:
+        return jsonify({"error": "Invalid ID format"}), 400
+
     # Quantity handling (already robust, but ensuring it works with JSON types)
     # If quantity is a string (legacy), try to parse it. If it's already a number/dict, use as is.
     if isinstance(quantity, str):
@@ -112,9 +117,10 @@ def calculate():
 
 # --- DATABASE LOGGING ROUTES ---
 
-@app.route('/api/logs/today', methods=['GET'])
+@app.route('/api/logs', methods=['GET'])
 def get_logs():
-    logs = database_setup.get_todays_logs()
+    date_str = request.args.get('date')
+    logs = database_setup.get_logs(date_str)
     
     # Calculate totals
     totals = {
@@ -160,7 +166,9 @@ def delete_log(log_id):
 @app.route('/api/reset', methods=['POST'])
 def reset_logs():
     try:
-        database_setup.clear_todays_logs()
+        data = request.get_json() or {}
+        date_str = data.get('date')
+        database_setup.clear_logs(date_str)
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -203,29 +211,40 @@ def analyze_image():
         # -----------------------------------------------------------------------------
 
         # 2. Use the new Container-Aware System Prompt
-        prompt = """
+        
+        # Create a list of all available food names for the AI to choose from
+        food_names = [f["name"] for f in utils.FOOD_DATA]
+        food_list_str = ", ".join(food_names)
+
+        prompt = f"""
         You are an expert Kenyan Nutrition AI. Analyze the image for food intake.
+        
+        CRITICAL: GENUINE IDENTIFICATION REQUIRED
+        You must identify ALL distinct foods in the image. You are RESTRICTED to choosing from the following list:
+        [{food_list_str}]
+        
+        If a food matches (e.g., 'Beef Sausages' -> 'Smokies', 'Fried Fish' -> 'Fish (Tilapia - Dry Fried)'), USE THE EXACT NAME FROM THE LIST.
 
-        Step 1: Detect the Container & Layout
-        - Is the food on a flat surface (plate, board, table)? -> Mode: COUNT.
-        - Is the food in a deep vessel (sufuria, bakuli, pot, tupperware, cup)? -> Mode: VOLUME.
+        Step 1: Detect Container & Layout
+        - Discrete items (e.g., Samosas, Smokies, Mandazi, Chapatis)? -> Mode: COUNT.
+        - Deep vessel (bowl) or amorphous mass? -> Mode: VOLUME.
 
-        Step 2: Analyze Quantity based on Mode
-        - If COUNT: Count visible items. Strictly check for stacking/piles. If items overlap significantly or form a heap (like a pile of mandazis/samosas), set is_stacked to true.
-        - If VOLUME: Identify the container type (e.g., 'standard_bowl', 'sufuria'). Estimate fullness from 0.0 to 1.0 (where 1.0 is brim-full).
-
-        Step 3: Return strict JSON
-        {
-          "food_name": "string (e.g. Beef Samosa)",
-          "nutritional_info": { "calories": int, "protein": int, "carbs": int, "fat": int },
-          "layout": {
-            "mode": "count" | "volume",
-            "container_type": "plate" | "sufuria" | "bowl" | "hand",
-            "is_stacked": boolean (True if pile detected),
-            "visible_count": integer (null if volume mode),
-            "fullness_index": float (0.0-1.0, null if count mode)
-          }
-        }
+        Step 2: Return strict JSON
+        {{
+          "items": [
+            {{
+              "food_name": "EXACT_NAME_FROM_LIST",
+              "nutritional_info": {{ "calories": int, "protein": int, "carbs": int, "fat": int }},
+              "layout": {{
+                "mode": "count" | "volume",
+                "container_type": "plate" | "sufuria" | "bowl" | "hand",
+                "is_stacked": boolean,
+                "visible_count": integer (null if volume),
+                "fullness_index": float (0.0-1.0, null if count)
+              }}
+            }}
+          ]
+        }}
         
         Return ONLY the raw JSON object. Do not use Markdown formatting.
         """
@@ -260,65 +279,82 @@ def analyze_image():
         
         print(f"AI Analysis: {ai_result}")
         
-        # 5. Safe Extraction with Defaults
-        food_name = ai_result.get('food_name', 'Unknown Food')
-        nutrition = ai_result.get('nutritional_info', {})
-        layout = ai_result.get('layout', {})
-
-        # 6. Match the food name to our database (Optional but good for consistency)
-        # We will use the AI provided nutrition if available, otherwise fallback to DB
-        matched_food = None
-        search_term = food_name.lower()
-
-        # Try to find in DB to get ID and other metadata
-        for item in utils.FOOD_DATA:
-            if item['name'].lower() == search_term:
-                matched_food = item
-                break
+        # 5. Process Response
+        results = []
         
-        if not matched_food:
-             for item in utils.FOOD_DATA:
-                if search_term in item['name'].lower():
-                    matched_food = item
+        # Normalize to list of items
+        detected_items = ai_result.get('items', [])
+        if not detected_items:
+            # Fallback for single object response if AI fails to follow list format
+            if 'food_name' in ai_result:
+                detected_items = [ai_result]
+
+        for item_data in detected_items:
+            food_name = item_data.get('food_name', '')
+            if not food_name: continue
+
+            # Match Logic
+            matched_food = None
+            search_term = food_name.lower()
+
+            # Exact Match
+            for db_item in utils.FOOD_DATA:
+                if db_item['name'].lower() == search_term:
+                    matched_food = db_item
                     break
-        
-        if not matched_food:
-            # Token Overlap Fallback
-            search_tokens = set(re.findall(r'\w+', search_term.lower()))
-            best_match = None
-            max_overlap = 0
             
-            for item in utils.FOOD_DATA:
-                item_tokens = set(re.findall(r'\w+', item['name'].lower()))
-                overlap = len(search_tokens.intersection(item_tokens))
-                
-                if overlap > max_overlap:
-                    max_overlap = overlap
-                    best_match = item
+            # Substring Match
+            if not matched_food:
+                for db_item in utils.FOOD_DATA:
+                    if search_term in db_item['name'].lower():
+                        matched_food = db_item
+                        break
             
-            if best_match and max_overlap > 0:
-                matched_food = best_match
-                print(f"Matched via Token Overlap: {matched_food['name']}")
+            # Token Match
+            if not matched_food:
+                search_tokens = set(re.findall(r'\w+', search_term))
+                best_match = None
+                max_overlap = 0
+                for db_item in utils.FOOD_DATA:
+                    item_tokens = set(re.findall(r'\w+', db_item['name'].lower()))
+                    overlap = len(search_tokens.intersection(item_tokens))
+                    if overlap > max_overlap:
+                        max_overlap = overlap
+                        best_match = db_item
+                if best_match and max_overlap > 0:
+                    matched_food = best_match
 
-        # Construct the response
-        response_data = {
-            "status": "success",
-            "analysis": ai_result,
-            "matched_food": {
-                "id": matched_food['id'] if matched_food else 999, # 999 for unknown
-                "name": food_name,
-                "calories_per_100g": nutrition.get('calories', 0), # Use AI estimate or 0
-                "protein_g": nutrition.get('protein', 0),
-                "carbs_g": nutrition.get('carbs', 0),
-                "fat_g": nutrition.get('fat', 0),
-                "serving_type": matched_food.get('serving_type', 'volumetric') if matched_food else 'volumetric',
-                "standard_unit_weight": matched_food.get('standard_unit_weight') if matched_food else None,
-                "components": matched_food.get('components', []) if matched_food else [],
-                "portions": matched_food.get('portions', []) if matched_food else []
+            # Construct result entry
+            food_result = {
+                "input_food_name": food_name,
+                "analysis": {
+                     "nutritional_info": item_data.get('nutritional_info', {}),
+                     "layout": item_data.get('layout', {})
+                }
             }
-        }
-        
-        return jsonify(response_data)
+            
+            if matched_food:
+                food_result["matched_food"] = {
+                    "id": matched_food['id'],
+                    "name": matched_food['name'],
+                    "calories_per_100g": matched_food['calories_per_100g'],
+                    "protein_per_100g": matched_food['protein_per_100g'],
+                    "fat_per_100g": matched_food['fat_per_100g'],
+                    "carbs_per_100g": matched_food['carbs_per_100g'],
+                    "serving_type": matched_food.get('serving_type', 'volumetric'),
+                    "standard_unit_weight": matched_food.get('standard_unit_weight'),
+                    "components": matched_food.get('components', []),
+                    "portions": matched_food.get('portions', [])
+                }
+            else:
+                 food_result["matched_food"] = None
+                 
+            results.append(food_result)
+
+        return jsonify({
+            "status": "success", 
+            "results": results
+        })
 
     except Exception as e:
         print(f"CRITICAL ERROR: {e}")

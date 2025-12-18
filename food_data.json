@@ -31,7 +31,7 @@
     },
     {
         "id": 2,
-        "name": "Ugali (Refined Maize)",
+        "name": "Ugali (White)",
         "calories_per_100g": 148,
         "protein_per_100g": 3.4,
         "fat_per_100g": 1.9,
@@ -181,7 +181,7 @@
     },
     {
         "id": 7,
-        "name": "Sukuma Wiki (Fried)",
+        "name": "Sukuma Wiki (Stewed)",
         "calories_per_100g": 54,
         "protein_per_100g": 2.5,
         "fat_per_100g": 3.2,
@@ -241,7 +241,7 @@
     },
     {
         "id": 9,
-        "name": "Spaghetti (Boiled)",
+        "name": "Spaghetti (Stewed)",
         "calories_per_100g": 122,
         "protein_per_100g": 4.4,
         "fat_per_100g": 0.5,
@@ -331,7 +331,7 @@
     },
     {
         "id": 12,
-        "name": "Cabbage (Fried)",
+        "name": "Cabbage (Fried/stewed)",
         "calories_per_100g": 100,
         "protein_per_100g": 1.2,
         "fat_per_100g": 8.6,
@@ -601,7 +601,7 @@
     },
     {
         "id": 21,
-        "name": "Fish (Tilapia - Deep Fried)",
+        "name": "Fish (Fried)",
         "calories_per_100g": 210,
         "protein_per_100g": 20.0,
         "fat_per_100g": 12.0,
@@ -841,7 +841,7 @@
     },
     {
         "id": 29,
-        "name": "Liver (Beef - Fried)",
+        "name": "Liver (Fried)",
         "calories_per_100g": 175,
         "protein_per_100g": 27.3,
         "fat_per_100g": 7.3,
@@ -931,7 +931,7 @@
     },
     {
         "id": 32,
-        "name": "Managu (Nightshade - Fried)",
+        "name": "Managu (Nightshade -stewed)",
         "calories_per_100g": 59,
         "protein_per_100g": 3.6,
         "fat_per_100g": 2.5,
@@ -961,7 +961,7 @@
     },
     {
         "id": 33,
-        "name": "Terere (Amaranth - Fried)",
+        "name": "Terere (Amaranth - stewed)",
         "calories_per_100g": 83,
         "protein_per_100g": 3.0,
         "fat_per_100g": 5.3,
@@ -991,7 +991,7 @@
     },
     {
         "id": 34,
-        "name": "Kunde (Cowpea Leaves - Fried)",
+        "name": "Kunde (Cowpea Leaves - stewed)",
         "calories_per_100g": 75,
         "protein_per_100g": 3.5,
         "fat_per_100g": 4.0,
@@ -1021,7 +1021,7 @@
     },
     {
         "id": 35,
-        "name": "Spinach (Stir Fried)",
+        "name": "Spinach (stewed)",
         "calories_per_100g": 74,
         "protein_per_100g": 2.8,
         "fat_per_100g": 5.4,
@@ -1081,7 +1081,7 @@
     },
     {
         "id": 37,
-        "name": "Samosa (Beef)",
+        "name": "Samosa",
         "calories_per_100g": 260,
         "protein_per_100g": 10.0,
         "fat_per_100g": 15.0,
@@ -1105,8 +1105,8 @@
                 "weight_g": 120
             }
         ],
-        "serving_type": "volumetric",
-        "standard_unit_weight": null,
+        "serving_type": "countable",
+        "standard_unit_weight": 40,
         "components": []
     },
     {
@@ -1201,7 +1201,7 @@
     },
     {
         "id": 41,
-        "name": "Soda (Coke/Fanta/Sprite)",
+        "name": "Soda (Coke/Fanta/Sprite/blackcurrant)",
         "calories_per_100g": 42,
         "protein_per_100g": 0.0,
         "fat_per_100g": 0.0,
@@ -1424,7 +1424,7 @@
     },
     {
         "id": 48,
-        "name": "Indomie (Chicken Flavor)",
+        "name": "Indomie (Chicken Flavor/Beef Flavor)",
         "calories_per_100g": 457,
         "protein_per_100g": 10.0,
         "fat_per_100g": 17.0,
@@ -1450,6 +1450,280 @@
         ],
         "serving_type": "volumetric",
         "standard_unit_weight": null,
+        "components": []
+    },
+    {
+        "id": 49,
+        "name": "Fish (Tilapia - Dry Fried)",
+        "calories_per_100g": 200,
+        "protein_per_100g": 21.0,
+        "fat_per_100g": 10.0,
+        "carbs_per_100g": 2.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 250,
+            "label": "Fish"
+        },
+        "portions": [
+            {
+                "label": "Small Fish",
+                "weight_g": 150
+            },
+            {
+                "label": "Medium Fish",
+                "weight_g": 250
+            },
+            {
+                "label": "Large Fish",
+                "weight_g": 400
+            }
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
+    },
+    {
+        "id": 50,
+        "name": "Fish (Tilapia - Stewed)",
+        "calories_per_100g": 180,
+        "protein_per_100g": 19.0,
+        "fat_per_100g": 8.0,
+        "carbs_per_100g": 5.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 300,
+            "label": "Fish"
+        },
+        "portions": [
+            {
+                "label": "Small Fish",
+                "weight_g": 200
+            },
+            {
+                "label": "Medium Fish",
+                "weight_g": 300
+            },
+            {
+                "label": "Large Fish",
+                "weight_g": 450
+            }
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
+    },
+    {
+        "id": 51,
+        "name": "Arrowroot (Nduma - Stewed)",
+        "calories_per_100g": 120,
+        "protein_per_100g": 2.0,
+        "fat_per_100g": 2.5,
+        "carbs_per_100g": 24.0,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Small Bowl",
+                "weight_g": 150
+            },
+            {
+                "label": "Standard Bowl",
+                "weight_g": 250
+            },
+            {
+                "label": "Large Bowl",
+                "weight_g": 350
+            }
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
+    },
+    {
+        "id": 52,
+        "name": "Potatoes (Stewed)",
+        "calories_per_100g": 115,
+        "protein_per_100g": 2.1,
+        "fat_per_100g": 3.0,
+        "carbs_per_100g": 21.0,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Small Bowl",
+                "weight_g": 150
+            },
+            {
+                "label": "Standard Bowl",
+                "weight_g": 250
+            },
+            {
+                "label": "Large Bowl",
+                "weight_g": 350
+            }
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
+    },
+    {
+        "id": 53,
+        "name": "Liver (Stewed)",
+        "calories_per_100g": 160,
+        "protein_per_100g": 26.0,
+        "fat_per_100g": 6.0,
+        "carbs_per_100g": 3.0,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Small Bowl",
+                "weight_g": 100
+            },
+            {
+                "label": "Standard Bowl",
+                "weight_g": 150
+            },
+            {
+                "label": "Large Bowl",
+                "weight_g": 250
+            }
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
+    },
+    {
+        "id": 54,
+        "name": "Sausages",
+        "calories_per_100g": 300,
+        "protein_per_100g": 12.0,
+        "fat_per_100g": 25.0,
+        "carbs_per_100g": 4.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 50,
+            "label": "Sausages"
+        },
+        "portions": [
+            {
+                "label": "1 Sausage",
+                "weight_g": 50
+            },
+            {
+                "label": "2 Sausages",
+                "weight_g": 100
+            },
+            {
+                "label": "3 Sausages",
+                "weight_g": 150
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 50,
+        "components": []
+    },
+    {
+        "id": 55,
+        "name": "Chicken (Fried)",
+        "calories_per_100g": 280,
+        "protein_per_100g": 20.0,
+        "fat_per_100g": 15.0,
+        "carbs_per_100g": 8.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 200,
+            "label": "Pieces"
+        },
+        "portions": [
+            {
+                "label": "Small Piece (Drumstick)",
+                "weight_g": 100
+            },
+            {
+                "label": "Quarter",
+                "weight_g": 200
+            },
+            {
+                "label": "Large Piece (Breast/Thigh)",
+                "weight_g": 300
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 200,
+        "components": []
+    },
+    {
+        "id": 56,
+        "name": "Roasted Meat (Beef Nyama Choma)",
+        "calories_per_100g": 250,
+        "protein_per_100g": 26.0,
+        "fat_per_100g": 15.0,
+        "carbs_per_100g": 0.0,
+        "manual_unit": {
+            "type": "weight",
+            "weight_per_unit_g": 1,
+            "label": "Grams"
+        },
+        "portions": [
+            {
+                "label": "Small Cuts",
+                "weight_g": 150
+            },
+            {
+                "label": "Standard Serving",
+                "weight_g": 250
+            },
+            {
+                "label": "Large Platter",
+                "weight_g": 400
+            }
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
+    },
+    {
+        "id": 57,
+        "name": "Roasted Chicken",
+        "calories_per_100g": 220,
+        "protein_per_100g": 24.0,
+        "fat_per_100g": 13.0,
+        "carbs_per_100g": 0.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 250,
+            "label": "Pieces (Quarters)"
+        },
+        "portions": [
+            {
+                "label": "Small Piece",
+                "weight_g": 150
+            },
+            {
+                "label": "Quarter Chicken",
+                "weight_g": 250
+            },
+            {
+                "label": "Half Chicken",
+                "weight_g": 500
+            },
+            {
+                "label": "Whole Chicken",
+                "weight_g": 1200
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 250,
         "components": []
     }
 ]

@@ -56,12 +56,12 @@
                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
                             </path>
                         </svg>
-                        Reset Day
+                        Clear All Logs
                     </button>
                 </div>
                 <input type="number" id="calorie-goal" value="2500" min="500" step="100"
                     class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
-                    onchange="saveGoalPreference(); updateProgressBar();">
+                    oninput="saveGoalPreference(); updateProgressBar();">
             </div>
 
             <!-- Progress Bar -->
@@ -143,14 +143,14 @@
                     </div>
                     <input type="file" id="camera-input" accept="image/*" class="hidden"
                         onchange="handleImageUpload(this)">
-                    <select id="food-select"
+                    <select id="food-select" onchange="updateQuantityLabel()"
                         class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
                         <option value="" disabled selected>Loading foods...</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Quantity (Servings)</label>
+                    <label class="block text-sm font-medium text-gray-600 mb-1" id="quantity-label">Quantity</label>
                     <input type="number" id="quantity" value="1" min="0.1" step="0.1"
                         class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
                 </div>
@@ -162,11 +162,32 @@
             </div>
         </div>
 
+        <!-- Date Navigator -->
+        <div class="bg-white rounded-xl shadow-md p-4 border border-gray-100 mb-6" id="date-navigator">
+            <div class="flex justify-between items-center mb-2">
+                <input type="date" id="date-picker" onchange="selectDate(this.value)"
+                    class="p-2 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 bg-gray-50 focus:ring-2 focus:ring-primary outline-none">
+                <span id="formatted-date-display" class="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                    Loading...
+                </span>
+            </div>
+            <div class="flex justify-between items-center space-x-1 overflow-x-auto pb-2" id="week-days-container">
+                <!-- Days injected by JS -->
+            </div>
+        </div>
+
         <!-- Today's Log -->
         <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-            <h2 class="text-xl font-semibold mb-4 text-gray-700">Today's Log</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-700" id="log-header">Today's Log</h2>
+                <button onclick="resetDay()"
+                    class="text-xs text-red-500 hover:text-red-700 font-bold uppercase tracking-wider transition-colors hover:bg-red-50 px-3 py-1 rounded-full border border-red-100 hover:border-red-200">
+                    Clear All
+                </button>
+            </div>
             <div id="log-list" class="space-y-3">
-                <p class="text-gray-400 text-center italic py-4" id="empty-log-msg">No meals logged yet today.</p>
+                <p class="text-gray-400 text-center italic py-4" id="empty-log-msg">No meals logged yet for this day.
+                </p>
             </div>
         </div>
 
@@ -209,72 +230,11 @@
 
             <!-- Content -->
             <div class="p-6 overflow-y-auto">
-                <p class="text-gray-600 mb-4" id="modal-message">The AI detected something.</p>
+                <p class="text-gray-600 mb-4" id="modal-message">The AI detected the following items:</p>
 
-                <!-- Countable Adjuster UI (Scenario: Countable) -->
-                <div id="countable-adjuster" class="hidden">
-                    <label class="block text-sm font-medium text-gray-600 mb-2 text-center">How many pieces?</label>
-                    <div class="flex items-center justify-center space-x-4 mb-6">
-                        <button onclick="adjustCount(-1)"
-                            class="w-12 h-12 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-600 transition">-</button>
-                        <span id="countable-count"
-                            class="text-5xl font-extrabold text-primary w-20 text-center">1</span>
-                        <button onclick="adjustCount(1)"
-                            class="w-12 h-12 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-600 transition">+</button>
-                    </div>
-                </div>
-
-                <!-- Composite Adjuster UI (Scenario: Composite) -->
-                <div id="composite-adjuster" class="hidden space-y-4 mb-6">
-                    <p class="text-sm text-gray-500 italic text-center">Adjust components if needed:</p>
-                    <div id="composite-list" class="space-y-3">
-                        <!-- Dynamic Inputs will be injected here -->
-                    </div>
-                    <div class="text-right font-bold text-primary text-lg border-t pt-2">
-                        Total: <span id="composite-total-calories">0</span> kcal
-                    </div>
-                </div>
-
-                <!-- Portion Selector UI (Scenario: Volumetric) -->
-                <div id="portion-selector" class="hidden space-y-3 mb-6">
-                    <button onclick="selectPortion('small')"
-                        class="w-full flex items-center justify-between p-4 border-2 border-gray-100 rounded-xl hover:border-primary hover:bg-green-50 transition group">
-                        <div class="flex items-center">
-                            <div
-                                class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-3 group-hover:bg-white">
-                                S</div>
-                            <div class="text-left">
-                                <p class="font-bold text-gray-800">Small Bowl</p>
-                                <p class="text-xs text-gray-500">Approx. 300g</p>
-                            </div>
-                        </div>
-                    </button>
-
-                    <button onclick="selectPortion('standard')"
-                        class="w-full flex items-center justify-between p-4 border-2 border-gray-100 rounded-xl hover:border-primary hover:bg-green-50 transition group">
-                        <div class="flex items-center">
-                            <div
-                                class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-3 group-hover:bg-white">
-                                M</div>
-                            <div class="text-left">
-                                <p class="font-bold text-gray-800">Standard Plate</p>
-                                <p class="text-xs text-gray-500">Approx. 500g</p>
-                            </div>
-                        </div>
-                    </button>
-
-                    <button onclick="selectPortion('large')"
-                        class="w-full flex items-center justify-between p-4 border-2 border-gray-100 rounded-xl hover:border-primary hover:bg-green-50 transition group">
-                        <div class="flex items-center">
-                            <div
-                                class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-3 group-hover:bg-white">
-                                L</div>
-                            <div class="text-left">
-                                <p class="font-bold text-gray-800">Large / Heaped</p>
-                                <p class="text-xs text-gray-500">Approx. 800g+</p>
-                            </div>
-                        </div>
-                    </button>
+                <!-- Multi-Item List Container -->
+                <div id="multi-item-container" class="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2">
+                    <!-- Dynamic Items will be injected here -->
                 </div>
 
                 <!-- Extras Menu -->
@@ -336,6 +296,28 @@
     </div>
 
     <script>
+        // --- STATE ---
+        let dailyLog = [];
+        let totalCalories = 0;
+        let totalProtein = 0;
+        let totalCarbs = 0;
+        let totalFats = 0;
+        let currentMultiAnalysis = [];
+        let currentExtras = new Set();
+
+        // Date State
+        // FIX: Use Local Time, not UTC (toISOString uses UTC)
+        const _d = new Date();
+        const _offset = _d.getTimezoneOffset() * 60000; // offset in milliseconds
+        // Adjust for timezone to get local ISO-like date
+        let currentDate = new Date(_d.getTime() - _offset).toISOString().split('T')[0];
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+
+
         const DEMO_FOODS = [
             { id: 101, name: "Chapati", calories: 120, protein_g: 3, fat_g: 4, carbs_g: 18 },
             { id: 102, name: "Ugali", calories: 150, protein_g: 2, fat_g: 0.5, carbs_g: 33 },
@@ -344,16 +326,112 @@
             { id: 105, name: "Rice", calories: 130, protein_g: 2, fat_g: 0.3, carbs_g: 28 }
         ];
 
-        let dailyLog = [];
-        let totalCalories = 0;
-        let totalProtein = 0;
-        let totalCarbs = 0;
-        let totalFats = 0;
+        // Helper to get local YYYY-MM-DD
+        function getLocalISODate(dateObj) {
+            const d = dateObj || new Date();
+            const offset = d.getTimezoneOffset() * 60000;
+            return new Date(d.getTime() - offset).toISOString().split('T')[0];
+        }
+
+        // --- DATE NAVIGATOR HELPERS ---
+        function getWeekDays(referenceDateStr) {
+            const dates = [];
+            const refDate = new Date(referenceDateStr);
+            // Show last 6 days + reference date (Total 7 days)
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(refDate);
+                d.setDate(refDate.getDate() - i);
+                dates.push(getLocalISODate(d));
+            }
+            return dates;
+        }
+
+        function renderWeekDays() {
+            const container = document.getElementById('week-days-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            // Generate days ending at Today (using Local Time)
+            const todayStr = getLocalISODate(new Date());
+            const anchorDate = (currentDate > todayStr) ? currentDate : todayStr;
+            const days = getWeekDays(anchorDate);
+
+            days.forEach(dateStr => {
+                const d = new Date(dateStr);
+                const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+                const dayNum = d.getDate();
+
+                const isSelected = dateStr === currentDate;
+                const isToday = dateStr === todayStr;
+
+                const btn = document.createElement('button');
+                btn.className = `flex flex-col items-center justify-center min-w-[3.5rem] w-14 h-16 rounded-xl transition-all border ${isSelected
+                    ? 'bg-primary text-white shadow-lg scale-105 border-primary'
+                    : 'bg-gray-50 text-gray-400 hover:bg-gray-100 border-transparent'
+                    }`;
+
+                btn.onclick = () => selectDate(dateStr);
+
+                btn.innerHTML = `
+                    <span class="text-[0.65rem] font-bold uppercase tracking-wider">${dayName}</span>
+                    <span class="text-lg font-bold leading-none my-1">${dayNum}</span>
+                    ${isToday ? '<span class="w-1.5 h-1.5 bg-current rounded-full"></span>' : '<span class="w-1.5 h-1.5"></span>'}
+                `;
+
+                container.appendChild(btn);
+            });
+
+            // Scroll to end (today)
+            // requestAnimationFrame(() => container.scrollLeft = container.scrollWidth);
+
+            // Update Headers
+            const monthLabel = document.getElementById('month-label');
+            const d = new Date(currentDate);
+            if (monthLabel) monthLabel.textContent = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const logHeader = document.getElementById('log-header');
+            if (logHeader) {
+                if (currentDate === todayStr) {
+                    logHeader.textContent = "Today's Log";
+                } else {
+                    logHeader.textContent = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+                }
+            }
+        }
+
+        function selectDate(dateStr) {
+            currentDate = dateStr;
+            // Update Picker
+            document.getElementById('date-picker').value = currentDate;
+
+            // Update Explicit Label (e.g., "Dec 18, 2025")
+            const dObj = new Date(currentDate);
+            const formatted = dObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            const label = document.getElementById('formatted-date-display');
+            if (label) label.textContent = formatted;
+
+            renderWeekDays();
+            fetchLogs();
+            document.getElementById('empty-log-msg').innerText = "Loading...";
+
+            // Re-render header
+            const logHeader = document.getElementById('log-header');
+            if (logHeader) {
+                const todayStr = getLocalISODate(new Date());
+                if (currentDate === todayStr) {
+                    logHeader.textContent = "Today's Log";
+                } else {
+                    const d = new Date(currentDate);
+                    logHeader.textContent = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+                }
+            }
+        }
 
         // Fetch logs from backend instead of local storage
         async function fetchLogs() {
             try {
-                const response = await fetch('/api/logs/today');
+                // Use currentDate filter
+                const response = await fetch(`/api/logs?date=${currentDate}`);
                 if (!response.ok) throw new Error('Failed to fetch logs');
 
                 const data = await response.json();
@@ -386,55 +464,6 @@
             updateProgressBar();
         }
 
-        function renderLogs() {
-            const logList = document.getElementById('log-list');
-
-            if (dailyLog.length > 0) {
-                logList.innerHTML = '';
-
-                dailyLog.forEach((meal) => {
-                    const item = document.createElement('div');
-                    item.className = "flex justify-between items-center bg-secondary p-4 rounded-lg border border-green-100";
-                    item.innerHTML = `
-                        <div class="flex-1">
-                            <p class="font-bold text-gray-800">
-                                ${meal.food_name}
-                                <span class="ml-2 px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500 border border-gray-200">Log</span>
-                            </p>
-                            <p class="text-xs text-gray-500">${meal.quantity_label || '1 serving'}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-bold text-primary">${Math.round(meal.calories)} kcal</p>
-                            <p class="text-xs text-gray-500">P:${Math.round(meal.protein_g)}g F:${Math.round(meal.fat_g)}g C:${Math.round(meal.carbs_g)}g</p>
-                        </div>
-                        <button onclick="deleteMeal(${meal.id})" class="ml-3 text-red-400 hover:text-red-600 transition-colors cursor-pointer p-2" title="Delete meal">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
-                    `;
-                    logList.appendChild(item);
-                });
-            } else {
-                logList.innerHTML = '<p class="text-gray-400 text-center italic py-4" id="empty-log-msg">No meals logged yet today.</p>';
-            }
-        }
-
-        async function deleteMeal(id) {
-            if (confirm('Delete this meal from your log?')) {
-                try {
-                    const response = await fetch(`/api/logs/${id}`, { method: 'DELETE' });
-                    if (!response.ok) throw new Error('Delete failed');
-
-                    await fetchLogs(); // Refresh
-                    console.log('🗑️ Meal deleted');
-                } catch (e) {
-                    console.error(e);
-                    alert("Failed to delete meal.");
-                }
-            }
-        }
-
         function updateAllStats() {
             document.getElementById('total-calories').textContent = Math.round(totalCalories);
             document.getElementById('total-protein').textContent = Math.round(totalProtein) + 'g';
@@ -465,11 +494,15 @@
         }
 
         async function resetDay() {
-            if (confirm('Are you sure you want to reset today\'s log? This will clear all meals and start fresh.')) {
+            if (confirm('Are you sure you want to reset the log for ' + formatDate(currentDate) + '?')) {
                 try {
-                    await fetch('/api/reset', { method: 'POST' });
+                    await fetch('/api/reset', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ date: currentDate })
+                    });
                     await fetchLogs();
-                    console.log('🔄 Day reset - all data cleared');
+                    console.log('🔄 Day reset - data cleared');
                 } catch (e) {
                     console.error(e);
                     alert("Failed to reset day.");
@@ -478,7 +511,15 @@
         }
 
         async function init() {
-            fetchLogs(); // Load from DB
+            // Set Date Picker Default
+            const datePicker = document.getElementById('date-picker');
+            if (datePicker) {
+                datePicker.value = currentDate;
+                selectDate(currentDate); // Initialize label and logs
+            } else {
+                renderWeekDays(); // Fallback if picker missing
+                fetchLogs();
+            }
 
             const select = document.getElementById('food-select');
             try {
@@ -502,11 +543,41 @@
                 option.textContent = food.name;
                 // Store serving type and components for logic
                 option.dataset.servingType = food.serving_type || 'volumetric';
+                // Store manual unit label
+                if (food.manual_unit) {
+                    option.dataset.unitLabel = food.manual_unit.label;
+                } else {
+                    option.dataset.unitLabel = "Servings"; // Fallback
+                }
+
                 if (food.components) {
                     option.dataset.components = JSON.stringify(food.components);
                 }
                 select.appendChild(option);
             });
+        }
+
+        function updateQuantityLabel() {
+            const select = document.getElementById('food-select');
+            const selectedOption = select.options[select.selectedIndex];
+            const label = document.getElementById('quantity-label');
+            const input = document.getElementById('quantity');
+
+            if (selectedOption) {
+                const unit = selectedOption.dataset.unitLabel || "Servings";
+                const servingType = selectedOption.dataset.servingType;
+
+                label.textContent = `Quantity (${unit})`;
+
+                if (servingType === 'volumetric' && unit.toLowerCase() === 'grams') {
+                    // Set default to 100g for gram-based items if value is 1
+                    if (input.value === '1') input.value = '100';
+                    input.step = '50';
+                } else {
+                    if (input.value === '100') input.value = '1';
+                    input.step = '0.5';
+                }
+            }
         }
 
         async function logMeal() {
@@ -574,7 +645,22 @@
             }
         }
 
-        let currentAnalysis = null; // Store current AI result for modal interactions
+        async function deleteMeal(id) {
+            if (confirm('Delete this meal from your log?')) {
+                try {
+                    const response = await fetch(`/api/logs/${id}`, { method: 'DELETE' });
+                    if (!response.ok) throw new Error('Delete failed');
+
+                    await fetchLogs(); // Refresh
+                    console.log('🗑️ Meal deleted');
+                } catch (e) {
+                    console.error(e);
+                    alert("Failed to delete meal.");
+                }
+            }
+        }
+
+        // currentExtras (defined at top)
 
         async function compressImage(file, { quality = 0.7, maxWidth = 1024, maxHeight = 1024, type = 'image/jpeg' } = {}) {
             return new Promise((resolve, reject) => {
@@ -658,13 +744,8 @@
                     const result = await response.json();
 
                     if (result.status === 'success') {
-                        currentAnalysis = result;
-                        const layout = result.analysis.layout;
-                        const foodName = result.matched_food.name;
-                        const servingType = result.matched_food.serving_type || 'volumetric'; // Get from backend
-
-                        // Show Modal with correct UI
-                        showVerificationModal(servingType, foodName, result);
+                        // Pass the array of items to the modal
+                        showVerificationModal(result.results);
 
                         btn.innerHTML = originalText;
                         btn.disabled = false;
@@ -687,107 +768,91 @@
             }
         }
 
-        // --- VERIFICATION MODAL LOGIC ---
+        // --- NEW MULTI-ITEM MODAL LOGIC (FIXED) ---
 
-        let currentExtras = new Set();
-        let currentServingType = 'volumetric';
-
-        function showVerificationModal(servingType, foodName, result) {
+        function showVerificationModal(results) {
+            currentMultiAnalysis = results;
             const modal = document.getElementById('verification-modal');
+            const container = document.getElementById('multi-item-container');
             const message = document.getElementById('modal-message');
 
-            const countableUI = document.getElementById('countable-adjuster');
-            const compositeUI = document.getElementById('composite-adjuster');
-            const portionUI = document.getElementById('portion-selector');
-
-            // Reset State
+            // Reset state
             currentExtras.clear();
             document.querySelectorAll('#extras-menu button').forEach(b => b.classList.remove('bg-green-100', 'border-primary', 'text-primary'));
-            currentServingType = servingType;
 
-            modal.classList.remove('hidden');
-
-            // Hide all first
-            countableUI.classList.add('hidden');
-            compositeUI.classList.add('hidden');
-            portionUI.classList.add('hidden');
-
-            if (servingType === 'countable') {
-                message.innerHTML = `Identified <b>${foodName}</b>.`;
-                countableUI.classList.remove('hidden');
-                // Set initial count
-                const count = result.analysis.layout.visible_count || 1;
-                document.getElementById('countable-count').textContent = count;
-                document.getElementById('countable-count').dataset.value = count;
-
-            } else if (servingType === 'composite') {
-                message.innerHTML = `Identified <b>${foodName}</b>.`;
-                compositeUI.classList.remove('hidden');
-                renderCompositeInputs(result.matched_food.components);
-
-            } else {
-                // Volumetric (Default)
-                message.innerHTML = `Identified <b>${foodName}</b>.`;
-                portionUI.classList.remove('hidden');
-            }
-        }
-
-        function adjustCount(delta) {
-            const display = document.getElementById('countable-count');
-            let val = parseInt(display.dataset.value) || 1;
-            val += delta;
-            if (val < 1) val = 1;
-            display.textContent = val;
-            display.dataset.value = val;
-        }
-
-        function renderCompositeInputs(components) {
-            const container = document.getElementById('composite-list');
+            // Populate list
             container.innerHTML = '';
 
-            if (!components || components.length === 0) {
-                container.innerHTML = '<p class="text-sm text-red-500">No components defined.</p>';
-                return;
+            if (results.length === 0) {
+                container.innerHTML = '<p class="text-sm text-red-500">No food items identified.</p>';
+            } else {
+                message.innerHTML = `The AI detected <b>${results.length}</b> item(s):`;
+
+                results.forEach((item, index) => {
+                    const foodName = item.matched_food ? item.matched_food.name : (item.input_food_name + " (Unknown)");
+                    const isKnown = !!item.matched_food;
+                    const servingType = isKnown ? item.matched_food.serving_type : 'volumetric';
+
+                    let inputHtml = '';
+                    let details = '';
+
+                    if (servingType === 'countable') {
+                        // Countable: Number Input
+                        const initialVal = item.analysis.layout.visible_count || 1;
+                        details = item.analysis.layout.is_stacked ? '<span class="text-xs text-orange-500 ml-2">Stack detected</span>' : '';
+
+                        inputHtml = `
+                            <div class="flex items-center space-x-2">
+                                <input type="number" id="qty-${index}" data-type="countable" value="${initialVal}" step="1" min="1" 
+                                    class="w-16 p-1 border rounded text-center font-bold text-gray-700 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+                                <span class="text-xs text-gray-500 w-12">pieces</span>
+                            </div>
+                        `;
+
+                    } else if (servingType === 'composite') {
+                        // Composite: Simple multiplier for now
+                        inputHtml = `
+                            <div class="flex items-center space-x-2">
+                                <input type="number" id="qty-${index}" data-type="composite" value="1" step="0.5" min="0.5" 
+                                    class="w-16 p-1 border rounded text-center font-bold text-gray-700 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+                                <span class="text-xs text-gray-500 w-12">servings</span>
+                            </div>
+                        `;
+                    } else {
+                        // Volumetric: Dropdown for Portion Size (Fixes 1g bug)
+                        if (item.analysis.layout.container_type) {
+                            details = `<span class="text-xs text-gray-400 ml-2">${item.analysis.layout.container_type}</span>`;
+                        }
+
+                        // Select default based on fullness
+                        let defaultVal = 250;
+                        if (item.analysis.layout.fullness_index < 0.4) defaultVal = 150;
+                        if (item.analysis.layout.fullness_index > 0.8) defaultVal = 400;
+
+                        inputHtml = `
+                             <select id="qty-${index}" data-type="volumetric" class="p-1 border rounded text-sm font-medium text-gray-700 bg-white focus:ring-2 focus:ring-primary outline-none">
+                                <option value="150" ${defaultVal === 150 ? 'selected' : ''}>Small (150g)</option>
+                                <option value="250" ${defaultVal === 250 ? 'selected' : ''}>Standard (250g)</option>
+                                <option value="400" ${defaultVal === 400 ? 'selected' : ''}>Large (400g)</option>
+                            </select>
+                        `;
+                    }
+
+                    // Create Row
+                    const row = document.createElement('div');
+                    row.className = "flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100";
+                    row.innerHTML = `
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-800 text-sm">${foodName} ${details}</p>
+                            ${!isKnown ? '<p class="text-xs text-red-400">Not in database (cannot calculate)</p>' : ''}
+                        </div>
+                        ${inputHtml}
+                    `;
+                    container.appendChild(row);
+                });
             }
 
-            components.forEach(comp => {
-                const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-gray-50 p-3 rounded-lg";
-
-                let inputHtml = '';
-                if (comp.serving_type === 'countable') {
-                    inputHtml = `
-                        <div class="flex items-center space-x-2">
-                            <button onclick="adjustComposite('${comp.slug}', -1)" class="w-6 h-6 rounded-full bg-gray-200 font-bold text-gray-600">-</button>
-                            <span id="comp-${comp.slug}" data-type="countable" data-val="1" class="font-bold w-4 text-center">1</span>
-                            <button onclick="adjustComposite('${comp.slug}', 1)" class="w-6 h-6 rounded-full bg-gray-200 font-bold text-gray-600">+</button>
-                        </div>
-                    `;
-                } else {
-                    // Volumetric component
-                    inputHtml = `
-                        <div class="flex items-center space-x-2">
-                            <input type="number" id="comp-${comp.slug}" data-type="volumetric" value="150" step="10" class="w-16 p-1 border rounded text-center text-sm">
-                            <span class="text-xs text-gray-500">g</span>
-                        </div>
-                    `;
-                }
-
-                div.innerHTML = `
-                    <span class="font-medium text-gray-700">${comp.name}</span>
-                    ${inputHtml}
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function adjustComposite(slug, delta) {
-            const el = document.getElementById(`comp-${slug}`);
-            let val = parseInt(el.dataset.val) || 0;
-            val += delta;
-            if (val < 0) val = 0;
-            el.textContent = val;
-            el.dataset.val = val;
+            modal.classList.remove('hidden');
         }
 
         function toggleExtra(extra) {
@@ -802,108 +867,159 @@
         }
 
         async function confirmVerification() {
-            if (!currentAnalysis) return;
-
-            const foodId = currentAnalysis.matched_food.id;
-            let quantityPayload = null;
-
-            // 1. Gather Quantity based on Type
-            if (currentServingType === 'countable') {
-                quantityPayload = parseFloat(document.getElementById('countable-count').dataset.value);
-
-            } else if (currentServingType === 'composite') {
-                quantityPayload = {};
-                const inputs = document.querySelectorAll('#composite-list [id^="comp-"]');
-                inputs.forEach(input => {
-                    const slug = input.id.replace('comp-', '');
-                    let val = 0;
-                    if (input.dataset.type === 'countable') {
-                        val = parseFloat(input.dataset.val);
-                    } else {
-                        val = parseFloat(input.value);
-                    }
-                    quantityPayload[slug] = val;
-                });
-
-            } else {
-                // Volumetric
-                if (!selectedVolumetricWeight) {
-                    alert("Please select a portion size.");
-                    return;
-                }
-                quantityPayload = selectedVolumetricWeight;
+            if (!currentMultiAnalysis || currentMultiAnalysis.length === 0) {
+                closeModal();
+                return;
             }
 
-            // 2. Call Backend
+            const btn = document.querySelector('button[onclick="confirmVerification()"]');
+            const originalText = btn.innerText;
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            const errors = [];
+            let successCount = 0;
+
             try {
-                const response = await fetch('/calculate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        id: foodId,
-                        quantity: quantityPayload,
-                        serving_type: currentServingType
-                    })
-                });
+                // 1. Log Main Items Individually
+                for (let i = 0; i < currentMultiAnalysis.length; i++) {
+                    const item = currentMultiAnalysis[i];
+                    if (!item.matched_food) continue;
 
-                if (!response.ok) throw new Error('Calculation failed');
-                const mealData = await response.json();
+                    const inputEl = document.getElementById(`qty-${i}`);
+                    const quantity = parseFloat(inputEl.value);
+                    const dataType = inputEl.dataset.type;
 
-                // 3. Add Extras
-                if (currentExtras.size > 0) {
-                    const extrasList = Array.from(currentExtras).join(', ');
-                    mealData.name += ` + ${extrasList}`;
-                    const extraCals = currentExtras.size * 50;
-                    mealData.calories += extraCals;
-                    mealData.fat_g += (currentExtras.size * 5); // Dummy fat
+                    // Calculate
+                    const response = await fetch('/calculate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: item.matched_food.id,
+                            quantity: quantity,
+                            serving_type: item.matched_food.serving_type || 'volumetric'
+                        })
+                    });
+
+                    if (!response.ok) {
+                        errors.push(item.matched_food.name);
+                        continue;
+                    }
+
+                    const mealData = await response.json();
+
+                    // Format quantity label
+                    let qtyLabel = "";
+                    if (dataType === 'countable') qtyLabel = `${quantity} piece(s)`;
+                    else if (dataType === 'volumetric') qtyLabel = `${quantity}g`;
+                    else qtyLabel = `${quantity} serving(s)`;
+
+                    // Add to DB immediately
+                    await addMealToLog(mealData, qtyLabel);
+                    successCount++;
                 }
 
-                addMealToLog(mealData, quantityPayload);
-                closeModal();
+                // 2. Log Extras Individually
+                const EXTRA_DATA = {
+                    'kachumbari': { name: 'Kachumbari', calories: 30, protein_g: 1, fat_g: 0, carbs_g: 5 },
+                    'mayo': { name: 'Mayonnaise', calories: 90, protein_g: 0, fat_g: 10, carbs_g: 0 },
+                    'ketchup': { name: 'Ketchup', calories: 20, protein_g: 0, fat_g: 0, carbs_g: 5 },
+                    'avocado': { name: 'Avocado (Slice)', calories: 50, protein_g: 1, fat_g: 5, carbs_g: 3 }
+                };
+
+                for (const extraKey of currentExtras) {
+                    const extra = EXTRA_DATA[extraKey];
+                    if (extra) {
+                        await addMealToLog({
+                            name: extra.name,
+                            calories: extra.calories,
+                            protein_g: extra.protein_g,
+                            fat_g: extra.fat_g,
+                            carbs_g: extra.carbs_g
+                        }, "1 serving");
+                        successCount++;
+                    }
+                }
+
+                if (errors.length > 0) {
+                    alert(`Some items failed to calculate: ${errors.join(', ')}`);
+                }
 
             } catch (error) {
-                console.error(error);
-                alert("Failed to calculate meal: " + error.message);
+                console.error("Error logging items:", error);
+                alert("An error occurred while logging.");
+            } finally {
+                closeModal();
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
-        }
-
-        let selectedVolumetricWeight = null;
-        function selectPortion(size) {
-            // Highlight selection
-            document.querySelectorAll('#portion-selector button').forEach(b => b.classList.remove('ring-2', 'ring-primary'));
-            event.currentTarget.classList.add('ring-2', 'ring-primary');
-
-            if (size === 'small') selectedVolumetricWeight = 300;
-            if (size === 'standard') selectedVolumetricWeight = 500;
-            if (size === 'large') selectedVolumetricWeight = 800;
         }
 
         function closeModal() {
             document.getElementById('verification-modal').classList.add('hidden');
-            currentAnalysis = null;
-            selectedVolumetricWeight = null;
         }
 
-        window.addEventListener('DOMContentLoaded', init);
+        // --- NEW RENDER LOGS WITH GROUPING ---
+
+        function renderLogs() {
+            const logList = document.getElementById('log-list');
+
+            // Sort logs by time (newest first).
+            const sortedLogs = [...dailyLog].reverse();
+
+            if (sortedLogs.length > 0) {
+                logList.innerHTML = '';
+
+                sortedLogs.forEach((meal) => {
+                    const mealTime = meal.timestamp ? new Date(meal.timestamp) : (meal.date_logged ? new Date(meal.date_logged) : new Date());
+
+                    // Time Formatting
+                    const hours = mealTime.getHours();
+                    let timeOfDay = "Morning";
+                    if (hours >= 12 && hours < 17) timeOfDay = "Afternoon";
+                    else if (hours >= 17) timeOfDay = "Evening";
+
+                    const timeStr = mealTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                    const fullTimeLabel = `${timeOfDay}, ${timeStr}`;
+
+                    // Create item container (Individual Card)
+                    const item = document.createElement('div');
+                    item.className = "bg-white border border-gray-100 rounded-xl shadow-sm mb-3 flex justify-between items-center p-4 hover:shadow-md transition";
+                    item.innerHTML = `
+                        <div class="flex-1">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1 flex items-center">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                ${fullTimeLabel}
+                            </p>
+                            <p class="font-bold text-gray-800 text-lg leading-tight">
+                                ${meal.food_name}
+                            </p>
+                            <p class="text-sm text-gray-500 mt-0.5">${meal.quantity_label || '1 serving'}</p>
+                        </div>
+                        <div class="text-right pl-4 border-l border-gray-50 ml-4">
+                            <p class="font-bold text-primary text-lg">${Math.round(meal.calories)} kcal</p>
+                            <div class="text-[10px] text-gray-400 mt-1 space-y-0.5">
+                                <p>Prot: <span class="font-medium text-gray-600">${Math.round(meal.protein_g)}g</span></p>
+                                <p>Fats: <span class="font-medium text-gray-600">${Math.round(meal.fat_g)}g</span></p>
+                                <p>Carbs: <span class="font-medium text-gray-600">${Math.round(meal.carbs_g)}g</span></p>
+                            </div>
+                        </div>
+                        <button onclick="deleteMeal(${meal.id})" class="ml-2 text-gray-300 hover:text-red-500 transition-colors cursor-pointer p-2 rounded-full hover:bg-red-50" title="Delete meal">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    `;
+                    logList.appendChild(item);
+                });
+            } else {
+                logList.innerHTML = '<p class="text-gray-400 text-center italic py-4" id="empty-log-msg">No meals logged yet today.</p>';
+            }
+        }
+
+        // Initialize
+        init();
     </script>
-
-    <style>
-        @keyframes fade-in {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-fade-in {
-            animation: fade-in 0.3s ease-out forwards;
-        }
-    </style>
 </body>
 
 </html>
