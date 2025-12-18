@@ -149,7 +149,8 @@ def add_log():
             fat=data.get('fat_g', 0),
             carbs=data.get('carbs_g', 0),
             quantity_label=data.get('quantity_label'),
-            timestamp_iso=data.get('timestamp')  # Pass the client timestamp
+            timestamp_iso=data.get('timestamp'),  # Pass the client timestamp
+            date_logged=data.get('date')          # Pass the client date
         )
         return jsonify({"success": True, "id": log_id}), 201
     except Exception as e:

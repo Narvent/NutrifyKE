@@ -632,7 +632,8 @@
                         fat_g: meal.fat_g,
                         carbs_g: meal.carbs_g,
                         input_quantity: meal.input_quantity || quantityLabel,
-                        timestamp: meal.timestamp || new Date().toISOString() // Use provided or generate new
+                        timestamp: meal.timestamp || new Date().toISOString(), // Use provided or generate new
+                        date: currentDate // Send the current client date
                     })
                 });
 
@@ -966,7 +967,8 @@
                         protein_g: Math.round(combinedMeal.protein_g),
                         fat_g: Math.round(combinedMeal.fat_g),
                         carbs_g: Math.round(combinedMeal.carbs_g),
-                        timestamp: new Date().toISOString() // Send client time
+                        timestamp: new Date().toISOString(), // Send client time
+                        date: currentDate // Send client date
                     }, quantityLabel);
 
                 } else if (errors.length > 0) {

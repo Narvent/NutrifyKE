@@ -121,12 +121,16 @@ def init_db():
     else:
         print(f"SUCCESS: Database initialized (Local SQLite: {DB_NAME}).")
 
-def add_log(food_name, calories, protein, fat, carbs, quantity_label, timestamp_iso=None):
+def add_log(food_name, calories, protein, fat, carbs, quantity_label, timestamp_iso=None, date_logged=None):
     """Adds a new meal log."""
     conn, db_type = get_db_connection()
     c = conn.cursor()
     
-    today = datetime.date.today().isoformat()
+    if date_logged:
+        today = date_logged
+    else:
+        today = datetime.date.today().isoformat()
+        
     # Use client timestamp if provided, else current UTC equivalent
     if timestamp_iso:
         now_ts = timestamp_iso
