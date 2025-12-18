@@ -1785,5 +1785,401 @@
         "serving_type": "countable",
         "standard_unit_weight": 40,
         "components": []
+    },
+    {
+        "id": 59,
+        "name": "Pizza (Beef/Pepperoni)",
+        "calories_per_100g": 285,
+        "protein_per_100g": 12.0,
+        "fat_per_100g": 13.0,
+        "carbs_per_100g": 30.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 100,
+            "label": "Slices"
+        },
+        "portions": [
+            {
+                "label": "1 Slice",
+                "weight_g": 100
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 100,
+        "components": []
+    },
+    {
+        "id": 60,
+        "name": "Fish Fillet (Deep Fried)",
+        "calories_per_100g": 230,
+        "protein_per_100g": 18.7,
+        "fat_per_100g": 14.0,
+        "carbs_per_100g": 8.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 150,
+            "label": "Pieces"
+        },
+        "portions": [
+            {
+                "label": "1 Piece",
+                "weight_g": 150
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 150,
+        "components": []
+    },
+    {
+        "id": 61,
+        "name": "Burger (Standard Beef with Cheese)",
+        "calories_per_100g": 260,
+        "protein_per_100g": 12.5,
+        "fat_per_100g": 14.0,
+        "carbs_per_100g": 19.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 200,
+            "label": "Burgers"
+        },
+        "portions": [
+            {
+                "label": "1 Burger",
+                "weight_g": 200
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 200,
+        "components": []
+    },
+    {
+        "id": 62,
+        "name": "Hot Dog (Standard)",
+        "calories_per_100g": 242,
+        "protein_per_100g": 8.3,
+        "fat_per_100g": 15.0,
+        "carbs_per_100g": 20.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 120,
+            "label": "Pieces"
+        },
+        "portions": [
+            {
+                "label": "1 Piece",
+                "weight_g": 120
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 120,
+        "components": []
+    },
+    {
+        "id": 63,
+        "name": "Chicken Pie (Kenyan Bakery Style)",
+        "calories_per_100g": 300,
+        "protein_per_100g": 10.0,
+        "fat_per_100g": 18.6,
+        "carbs_per_100g": 22.9,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 140,
+            "label": "Pies"
+        },
+        "portions": [
+            {
+                "label": "1 Pie",
+                "weight_g": 140
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 140,
+        "components": []
+    },
+    {
+        "id": 64,
+        "name": "KFC Chicken (Original Recipe Thigh)",
+        "calories_per_100g": 255,
+        "protein_per_100g": 17.3,
+        "fat_per_100g": 17.3,
+        "carbs_per_100g": 7.3,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 110,
+            "label": "Pieces"
+        },
+        "portions": [
+            {
+                "label": "1 Piece",
+                "weight_g": 110
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 110,
+        "components": []
+    },
+    {
+        "id": 65,
+        "name": "Broccoli (Steamed/Boiled)",
+        "calories_per_100g": 35,
+        "protein_per_100g": 2.8,
+        "fat_per_100g": 0.4,
+        "carbs_per_100g": 7.0,
+        "manual_unit": {
+            "type": "bowl",
+            "weight_per_unit_g": 100,
+            "label": "Bowls"
+        },
+        "portions": [
+            {
+                "label": "1 Bowl (100g)",
+                "weight_g": 100
+            }
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": 100,
+        "components": []
+    },
+    {
+        "id": 66,
+        "name": "Minced Meat (Cooked Beef)",
+        "calories_per_100g": 250,
+        "protein_per_100g": 20.0,
+        "fat_per_100g": 18.0,
+        "carbs_per_100g": 0.0,
+        "manual_unit": {
+            "type": "bowl",
+            "weight_per_unit_g": 150,
+            "label": "Servings"
+        },
+        "portions": [
+            {
+                "label": "1 Serving (100g)",
+                "weight_g": 100
+            }
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": 100,
+        "components": []
+    },
+    {
+        "id": 67,
+        "name": "Coffee (Black)",
+        "calories_per_100g": 1,
+        "protein_per_100g": 0.1,
+        "fat_per_100g": 0.0,
+        "carbs_per_100g": 0.0,
+        "manual_unit": {
+            "type": "cup",
+            "weight_per_unit_g": 240,
+            "label": "Cups"
+        },
+        "portions": [
+            {
+                "label": "1 Cup",
+                "weight_g": 240
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 240,
+        "components": []
+    },
+    {
+        "id": 68,
+        "name": "Coffee (White w/ Milk & Sugar)",
+        "calories_per_100g": 76,
+        "protein_per_100g": 1.9,
+        "fat_per_100g": 2.1,
+        "carbs_per_100g": 9.2,
+        "manual_unit": {
+            "type": "cup",
+            "weight_per_unit_g": 240,
+            "label": "Cups"
+        },
+        "portions": [
+            {
+                "label": "1 Cup",
+                "weight_g": 240
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 240,
+        "components": []
+    },
+    {
+        "id": 69,
+        "name": "Cheese (Cheddar)",
+        "calories_per_100g": 411,
+        "protein_per_100g": 25.0,
+        "fat_per_100g": 32.1,
+        "carbs_per_100g": 1.4,
+        "manual_unit": {
+            "type": "slice",
+            "weight_per_unit_g": 28,
+            "label": "Slices"
+        },
+        "portions": [
+            {
+                "label": "1 Slice",
+                "weight_g": 28
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 28,
+        "components": []
+    },
+    {
+        "id": 70,
+        "name": "Kamande (Lentil Stew)",
+        "calories_per_100g": 115,
+        "protein_per_100g": 9.0,
+        "fat_per_100g": 0.8,
+        "carbs_per_100g": 19.5,
+        "manual_unit": {
+            "type": "bowl",
+            "weight_per_unit_g": 200,
+            "label": "Cups"
+        },
+        "portions": [
+            {
+                "label": "1 Cup",
+                "weight_g": 200
+            }
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": 200,
+        "components": []
+    },
+    {
+        "id": 71,
+        "name": "Smocha (Chapati + Smokie)",
+        "calories_per_100g": 261,
+        "protein_per_100g": 8.9,
+        "fat_per_100g": 14.4,
+        "carbs_per_100g": 24.4,
+        "manual_unit": {
+            "type": "wrap",
+            "weight_per_unit_g": 180,
+            "label": "Wraps"
+        },
+        "portions": [
+            {
+                "label": "1 Wrap",
+                "weight_g": 180
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 180,
+        "components": []
+    },
+    {
+        "id": 72,
+        "name": "Chocolate Milkshake",
+        "calories_per_100g": 150,
+        "protein_per_100g": 3.3,
+        "fat_per_100g": 6.0,
+        "carbs_per_100g": 20.0,
+        "manual_unit": {
+            "type": "cup",
+            "weight_per_unit_g": 300,
+            "label": "Cups"
+        },
+        "portions": [
+            {
+                "label": "1 Cup",
+                "weight_g": 300
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 300,
+        "components": []
+    },
+    {
+        "id": 73,
+        "name": "Energy Drink (Red Bull/Monster)",
+        "calories_per_100g": 44,
+        "protein_per_100g": 0.0,
+        "fat_per_100g": 0.0,
+        "carbs_per_100g": 11.2,
+        "manual_unit": {
+            "type": "can",
+            "weight_per_unit_g": 250,
+            "label": "Cans"
+        },
+        "portions": [
+            {
+                "label": "1 Can",
+                "weight_g": 250
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 250,
+        "components": []
+    },
+    {
+        "id": 74,
+        "name": "French Fries (Standard Chips)",
+        "calories_per_100g": 312,
+        "protein_per_100g": 3.2,
+        "fat_per_100g": 16.8,
+        "carbs_per_100g": 38.0,
+        "manual_unit": {
+            "type": "plate",
+            "weight_per_unit_g": 250,
+            "label": "Plates"
+        },
+        "portions": [
+            {
+                "label": "1 Plate",
+                "weight_g": 250
+            }
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": 250,
+        "components": []
+    },
+    {
+        "id": 75,
+        "name": "Chips Masala",
+        "calories_per_100g": 183,
+        "protein_per_100g": 2.2,
+        "fat_per_100g": 8.7,
+        "carbs_per_100g": 25.0,
+        "manual_unit": {
+            "type": "plate",
+            "weight_per_unit_g": 300,
+            "label": "Plates"
+        },
+        "portions": [
+            {
+                "label": "1 Plate",
+                "weight_g": 300
+            }
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": 300,
+        "components": []
+    },
+    {
+        "id": 76,
+        "name": "Predator Energy Drink",
+        "calories_per_100g": 20,
+        "protein_per_100g": 0.0,
+        "fat_per_100g": 0.0,
+        "carbs_per_100g": 5.0,
+        "manual_unit": {
+            "type": "can",
+            "weight_per_unit_g": 500,
+            "label": "Cans"
+        },
+        "portions": [
+            {
+                "label": "1 Can",
+                "weight_g": 500
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 500,
+        "components": []
     }
 ]
