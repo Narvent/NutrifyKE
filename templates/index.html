@@ -874,23 +874,29 @@
 
             const btn = document.querySelector('button[onclick="confirmVerification()"]');
             const originalText = btn.innerText;
-            btn.innerText = "Processing...";
+            btn.innerText = "Calculating...";
             btn.disabled = true;
 
+            let combinedMeal = {
+                name_parts: [],
+                calories: 0,
+                protein_g: 0,
+                fat_g: 0,
+                carbs_g: 0
+            };
+
             const errors = [];
-            let successCount = 0;
 
             try {
-                // 1. Log Main Items Individually
+                // 1. Iterate and Calculate Totals (but don't log yet)
                 for (let i = 0; i < currentMultiAnalysis.length; i++) {
                     const item = currentMultiAnalysis[i];
                     if (!item.matched_food) continue;
 
                     const inputEl = document.getElementById(`qty-${i}`);
                     const quantity = parseFloat(inputEl.value);
-                    const dataType = inputEl.dataset.type;
 
-                    // Calculate
+                    // Call Backend to Calculate this specific item
                     const response = await fetch('/calculate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -906,20 +912,20 @@
                         continue;
                     }
 
-                    const mealData = await response.json();
+                    const data = await response.json();
 
-                    // Format quantity label
-                    let qtyLabel = "";
-                    if (dataType === 'countable') qtyLabel = `${quantity} piece(s)`;
-                    else if (dataType === 'volumetric') qtyLabel = `${quantity}g`;
-                    else qtyLabel = `${quantity} serving(s)`;
+                    // Accumulate totals
+                    combinedMeal.calories += data.calories;
+                    combinedMeal.protein_g += data.protein_g;
+                    combinedMeal.fat_g += data.fat_g;
+                    combinedMeal.carbs_g += data.carbs_g;
 
-                    // Add to DB immediately
-                    await addMealToLog(mealData, qtyLabel);
-                    successCount++;
+                    // Format Name
+                    combinedMeal.name_parts.push(data.name);
                 }
 
-                // 2. Log Extras Individually
+                // 2. Add Extras
+                // Map of keys to simple nutritional values
                 const EXTRA_DATA = {
                     'kachumbari': { name: 'Kachumbari', calories: 30, protein_g: 1, fat_g: 0, carbs_g: 5 },
                     'mayo': { name: 'Mayonnaise', calories: 90, protein_g: 0, fat_g: 10, carbs_g: 0 },
@@ -927,22 +933,37 @@
                     'avocado': { name: 'Avocado (Slice)', calories: 50, protein_g: 1, fat_g: 5, carbs_g: 3 }
                 };
 
+                // Add Extras to Totals
                 for (const extraKey of currentExtras) {
                     const extra = EXTRA_DATA[extraKey];
                     if (extra) {
-                        await addMealToLog({
-                            name: extra.name,
-                            calories: extra.calories,
-                            protein_g: extra.protein_g,
-                            fat_g: extra.fat_g,
-                            carbs_g: extra.carbs_g
-                        }, "1 serving");
-                        successCount++;
+                        combinedMeal.name_parts.push(extra.name);
+                        combinedMeal.calories += extra.calories;
+                        combinedMeal.protein_g += extra.protein_g;
+                        combinedMeal.fat_g += extra.fat_g;
+                        combinedMeal.carbs_g += extra.carbs_g;
                     }
                 }
 
-                if (errors.length > 0) {
-                    alert(`Some items failed to calculate: ${errors.join(', ')}`);
+                // 3. Log the Combined Result
+                if (combinedMeal.name_parts.length > 0) {
+                    const finalName = combinedMeal.name_parts.join(' + ');
+
+                    // Create a more descriptive quantity label
+                    // e.g. "3 items" or just list the count if small
+                    const itemCount = currentMultiAnalysis.length + currentExtras.size;
+                    const quantityLabel = `${itemCount} item${itemCount > 1 ? 's' : ''} (Aggregated)`;
+
+                    await addMealToLog({
+                        name: finalName,
+                        calories: Math.round(combinedMeal.calories),
+                        protein_g: Math.round(combinedMeal.protein_g),
+                        fat_g: Math.round(combinedMeal.fat_g),
+                        carbs_g: Math.round(combinedMeal.carbs_g)
+                    }, quantityLabel);
+
+                } else if (errors.length > 0) {
+                    alert(`Failed to calculate: ${errors.join(', ')}`);
                 }
 
             } catch (error) {
