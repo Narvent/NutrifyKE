@@ -1725,5 +1725,65 @@
         "serving_type": "countable",
         "standard_unit_weight": 250,
         "components": []
+    },
+    {
+        "id": 57,
+        "name": "Samosa (Ndengu)",
+        "calories_per_100g": 325,
+        "protein_per_100g": 8.5,
+        "fat_per_100g": 13.1,
+        "carbs_per_100g": 40.2,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 40,
+            "label": "Pieces"
+        },
+        "portions": [
+            {
+                "label": "1 Samosa",
+                "weight_g": 40
+            },
+            {
+                "label": "2 Samosas",
+                "weight_g": 80
+            },
+            {
+                "label": "3 Samosas",
+                "weight_g": 120
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 40,
+        "components": []
+    },
+    {
+        "id": 58,
+        "name": "Samosa (Viazi/Potato)",
+        "calories_per_100g": 325,
+        "protein_per_100g": 8.5,
+        "fat_per_100g": 13.1,
+        "carbs_per_100g": 40.2,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 40,
+            "label": "Pieces"
+        },
+        "portions": [
+            {
+                "label": "1 Samosa",
+                "weight_g": 40
+            },
+            {
+                "label": "2 Samosas",
+                "weight_g": 80
+            },
+            {
+                "label": "3 Samosas",
+                "weight_g": 120
+            }
+        ],
+        "serving_type": "countable",
+        "standard_unit_weight": 40,
+        "components": []
     }
 ]
