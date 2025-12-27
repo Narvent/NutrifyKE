@@ -2181,5 +2181,35 @@
         "serving_type": "countable",
         "standard_unit_weight": 500,
         "components": []
+    },
+    {
+        "id": 77,
+        "name": "Fish (Stewed/Wet Fry)",
+        "calories_per_100g": 123,
+        "protein_per_100g": 18.0,
+        "fat_per_100g": 5.0,
+        "carbs_per_100g": 2.0,
+        "manual_unit": {
+            "type": "piece",
+            "weight_per_unit_g": 250,
+            "label": "Fish"
+        },
+        "portions": [
+            {
+                "label": "Small Fish",
+                "weight_g": 150
+            },
+            {
+                "label": "Medium Fish",
+                "weight_g": 250
+            },
+            {
+                "label": "Large Fish",
+                "weight_g": 400
+            }
+        ],
+        "serving_type": "volumetric",
+        "standard_unit_weight": null,
+        "components": []
     }
 ]

@@ -213,6 +213,7 @@
     </div>
 
     <!-- Verification Modal -->
+    
     <div id="verification-modal"
         class="fixed inset-0 bg-black/80 z-[70] hidden flex items-center justify-center backdrop-blur-sm p-4">
         <div
@@ -303,7 +304,9 @@
         let totalCarbs = 0;
         let totalFats = 0;
         let currentMultiAnalysis = [];
+        
         let currentExtras = new Set();
+        let ALL_FOODS = []; // Global store for food data
 
         // Date State
         // FIX: Use Local Time, not UTC (toISOString uses UTC)
@@ -477,19 +480,45 @@
             if (progressBar) {
                 const goalInput = document.getElementById('calorie-goal');
                 const goal = goalInput ? (parseInt(goalInput.value) || 2500) : 2500;
-                const percentage = Math.min((totalCalories / goal) * 100, 100);
+                
+                // Calculate percentage (can go over 100%)
+                const rawPercentage = (totalCalories / goal) * 100;
+                const displayPercentage = Math.min(rawPercentage, 100); // Bar doesn't grow past 100% width
 
-                progressBar.style.width = percentage + '%';
+                progressBar.style.width = displayPercentage + '%';
 
-                const remaining = Math.max(goal - totalCalories, 0);
                 const elRemaining = document.getElementById('calories-remaining');
-                if (elRemaining) elRemaining.textContent = Math.round(remaining) + ' kcal remaining';
-
                 const elText = document.getElementById('progress-text');
-                if (elText) elText.textContent = Math.round(totalCalories) + ' / ' + goal + ' kcal';
-
                 const elPercent = document.getElementById('progress-percentage');
-                if (elPercent) elPercent.textContent = Math.round((totalCalories / goal) * 100) + '% of daily goal';
+
+                if (totalCalories > goal) {
+                    // Over Limit State
+                    const overBy = Math.round(totalCalories - goal);
+                    
+                    progressBar.classList.remove('from-green-400', 'to-primary');
+                    progressBar.classList.add('from-red-500', 'to-red-600');
+                    
+                    if (elRemaining) {
+                        elRemaining.textContent = `Over limit by ${overBy} kcal`;
+                        elRemaining.classList.remove('text-green-600');
+                        elRemaining.classList.add('text-red-600', 'animate-pulse');
+                    }
+                } else {
+                    // Under Limit State
+                    const remaining = Math.round(goal - totalCalories);
+                    
+                    progressBar.classList.remove('from-red-500', 'to-red-600');
+                    progressBar.classList.add('from-green-400', 'to-primary');
+                    
+                    if (elRemaining) {
+                        elRemaining.textContent = `${remaining} kcal remaining`;
+                        elRemaining.classList.remove('text-red-600', 'animate-pulse');
+                        elRemaining.classList.add('text-green-600');
+                    }
+                }
+
+                if (elText) elText.textContent = Math.round(totalCalories) + ' / ' + goal + ' kcal';
+                if (elPercent) elPercent.textContent = Math.round(rawPercentage) + '% of daily goal';
             }
         }
 
@@ -526,9 +555,11 @@
                 const response = await fetch('/foods');
                 if (!response.ok) throw new Error('Network response was not ok');
                 const foods = await response.json();
+                ALL_FOODS = foods;
                 populateDropdown(foods);
             } catch (error) {
                 console.warn("Backend unreachable, switching to Demo Mode.", error);
+                ALL_FOODS = DEMO_FOODS;
                 populateDropdown(DEMO_FOODS);
             }
         }
@@ -777,6 +808,16 @@
 
         // --- NEW MULTI-ITEM MODAL LOGIC (FIXED) ---
 
+        function getFoodOptionsHtml(selectedId) {
+            // Sort foods alphabetically
+            const sortedFoods = [...ALL_FOODS].sort((a, b) => a.name.localeCompare(b.name));
+            
+            return sortedFoods.map(food => {
+                const isSelected = String(food.id) === String(selectedId);
+                return `<option value="${food.id}" ${isSelected ? 'selected' : ''}>${food.name}</option>`;
+            }).join('');
+        }
+
         function showVerificationModal(results) {
             currentMultiAnalysis = results;
             const modal = document.getElementById('verification-modal');
@@ -796,15 +837,14 @@
                 message.innerHTML = `The AI detected <b>${results.length}</b> item(s):`;
 
                 results.forEach((item, index) => {
-                    const foodName = item.matched_food ? item.matched_food.name : (item.input_food_name + " (Unknown)");
-                    const isKnown = !!item.matched_food;
-                    const servingType = isKnown ? item.matched_food.serving_type : 'volumetric';
-
+                    const matchedId = item.matched_food ? item.matched_food.id : '';
+                    const servingType = item.matched_food ? item.matched_food.serving_type : 'volumetric';
+                    
                     let inputHtml = '';
                     let details = '';
 
+                    // Generate Input based on Serving Type
                     if (servingType === 'countable') {
-                        // Countable: Number Input
                         const initialVal = item.analysis.layout.visible_count || 1;
                         details = item.analysis.layout.is_stacked ? '<span class="text-xs text-orange-500 ml-2">Stack detected</span>' : '';
 
@@ -817,7 +857,6 @@
                         `;
 
                     } else if (servingType === 'composite') {
-                        // Composite: Simple multiplier for now
                         inputHtml = `
                             <div class="flex items-center space-x-2">
                                 <input type="number" id="qty-${index}" data-type="composite" value="1" step="0.5" min="0.5" 
@@ -826,40 +865,129 @@
                             </div>
                         `;
                     } else {
-                        // Volumetric: Dropdown for Portion Size (Fixes 1g bug)
+                        // Volumetric
                         if (item.analysis.layout.container_type) {
                             details = `<span class="text-xs text-gray-400 ml-2">${item.analysis.layout.container_type}</span>`;
                         }
 
-                        // Select default based on fullness
-                        let defaultVal = 250;
-                        if (item.analysis.layout.fullness_index < 0.4) defaultVal = 150;
-                        if (item.analysis.layout.fullness_index > 0.8) defaultVal = 400;
+                        // Dynamic Portions Logic
+                        let optionsHtml = '';
+                        const portions = item.matched_food ? item.matched_food.portions : [];
+                        
+                        if (portions && portions.length > 0) {
+                            // Use defined portions
+                            // Try to find a default based on fullness
+                            let defaultIndex = 1; // Default to middle option
+                            if (item.analysis.layout.fullness_index < 0.4) defaultIndex = 0;
+                            if (item.analysis.layout.fullness_index > 0.8) defaultIndex = portions.length - 1;
 
-                        inputHtml = `
-                             <select id="qty-${index}" data-type="volumetric" class="p-1 border rounded text-sm font-medium text-gray-700 bg-white focus:ring-2 focus:ring-primary outline-none">
+                            optionsHtml = portions.map((p, idx) => 
+                                `<option value="${p.weight_g}" ${idx === defaultIndex ? 'selected' : ''}>${p.label} (${p.weight_g}g)</option>`
+                            ).join('');
+                        } else {
+                            // Fallback to generic sizes
+                            let defaultVal = 250;
+                            if (item.analysis.layout.fullness_index < 0.4) defaultVal = 150;
+                            if (item.analysis.layout.fullness_index > 0.8) defaultVal = 400;
+
+                            optionsHtml = `
                                 <option value="150" ${defaultVal === 150 ? 'selected' : ''}>Small (150g)</option>
                                 <option value="250" ${defaultVal === 250 ? 'selected' : ''}>Standard (250g)</option>
                                 <option value="400" ${defaultVal === 400 ? 'selected' : ''}>Large (400g)</option>
+                            `;
+                        }
+
+                        inputHtml = `
+                             <select id="qty-${index}" data-type="volumetric" class="p-1 border rounded text-sm font-medium text-gray-700 bg-white focus:ring-2 focus:ring-primary outline-none">
+                                ${optionsHtml}
                             </select>
                         `;
                     }
 
                     // Create Row
                     const row = document.createElement('div');
-                    row.className = "flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100";
-                    row.innerHTML = `
-                        <div class="flex-1">
-                            <p class="font-bold text-gray-800 text-sm">${foodName} ${details}</p>
-                            ${!isKnown ? '<p class="text-xs text-red-400">Not in database (cannot calculate)</p>' : ''}
+                    row.className = "flex flex-col gap-2 bg-gray-50 p-3 rounded-lg border border-gray-100";
+                    
+                    // Top Row: Food Selector + Delete Button
+                    const topRow = document.createElement('div');
+                    topRow.className = "flex justify-between items-center w-full";
+                    
+                    topRow.innerHTML = `
+                        <div class="flex-1 mr-2">
+                            <select onchange="updateVerificationItem(${index}, this.value)" 
+                                class="w-full p-1 text-sm font-bold text-gray-800 bg-transparent border-b border-gray-300 focus:border-primary outline-none">
+                                <option value="" disabled ${!matchedId ? 'selected' : ''}>Select Food...</option>
+                                ${getFoodOptionsHtml(matchedId)}
+                            </select>
+                            ${details}
                         </div>
-                        ${inputHtml}
+                        <button onclick="deleteVerificationItem(${index})" class="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-red-50 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
                     `;
+
+                    // Bottom Row: Quantity Input
+                    const bottomRow = document.createElement('div');
+                    bottomRow.className = "flex justify-end w-full";
+                    bottomRow.innerHTML = inputHtml;
+
+                    row.appendChild(topRow);
+                    row.appendChild(bottomRow);
+                    
                     container.appendChild(row);
                 });
             }
+            
+            // Add "Add Item" Button
+            const addButton = document.createElement('button');
+            addButton.onclick = addVerificationItem;
+            addButton.className = "w-full py-2 mt-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-primary hover:text-primary font-semibold text-sm transition flex items-center justify-center";
+            addButton.innerHTML = `
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Add Another Item
+            `;
+            container.appendChild(addButton);
+
+
 
             modal.classList.remove('hidden');
+        }
+
+        function updateVerificationItem(index, newFoodId) {
+            const food = ALL_FOODS.find(f => String(f.id) === String(newFoodId));
+            if (food) {
+                // Update the underlying data model
+                currentMultiAnalysis[index].matched_food = food;
+                // Reset analysis layout to defaults for the new type to avoid carry-over weirdness
+                currentMultiAnalysis[index].analysis.layout = {
+                    mode: food.serving_type === 'countable' ? 'count' : 'volume',
+                    visible_count: 1,
+                    fullness_index: 0.5
+                };
+                // Re-render to update inputs
+                showVerificationModal(currentMultiAnalysis);
+            }
+        }
+
+        function deleteVerificationItem(index) {
+            currentMultiAnalysis.splice(index, 1);
+            showVerificationModal(currentMultiAnalysis);
+        }
+
+        function addVerificationItem() {
+            // Add a placeholder item
+            currentMultiAnalysis.push({
+                input_food_name: "",
+                matched_food: null, // User must select
+                analysis: {
+                    layout: { mode: 'volume', fullness_index: 0.5 }
+                }
+            });
+            showVerificationModal(currentMultiAnalysis);
         }
 
         function toggleExtra(extra) {
@@ -898,7 +1026,7 @@
                 // 1. Iterate and Calculate Totals (but don't log yet)
                 for (let i = 0; i < currentMultiAnalysis.length; i++) {
                     const item = currentMultiAnalysis[i];
-                    if (!item.matched_food) continue;
+                    if (!item.matched_food) continue; // Skip unselected items
 
                     const inputEl = document.getElementById(`qty-${i}`);
                     const quantity = parseFloat(inputEl.value);
@@ -958,7 +1086,7 @@
 
                     // Create a more descriptive quantity label
                     // e.g. "3 items" or just list the count if small
-                    const itemCount = currentMultiAnalysis.length + currentExtras.size;
+                    const itemCount = currentMultiAnalysis.filter(i => i.matched_food).length + currentExtras.size;
                     const quantityLabel = `${itemCount} item${itemCount > 1 ? 's' : ''} (Aggregated)`;
 
                     await addMealToLog({
