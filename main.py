@@ -263,6 +263,14 @@ def reset_logs():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/init-db', methods=['GET'])
+def manual_init_db():
+    try:
+        database_setup.init_db()
+        return jsonify({"status": "success", "message": "Database initialized successfully."})
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
+
 # --- MULTI-FOOD DETECTION ROUTE ---
 @app.route('/analyze', methods=['POST'])
 @login_required
