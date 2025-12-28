@@ -64,6 +64,7 @@ def init_db():
                 id SERIAL PRIMARY KEY,
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
+                display_name TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         ''')
@@ -91,6 +92,7 @@ def init_db():
         add_column_if_not_exists("daily_logs", "fat_g", "REAL")
         add_column_if_not_exists("daily_logs", "carbs_g", "REAL")
         add_column_if_not_exists("daily_logs", "user_id", "INTEGER REFERENCES users(id)")
+        add_column_if_not_exists("users", "display_name", "TEXT")
         
     else:
         # SQLite
@@ -101,6 +103,7 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
+                display_name TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         ''')
@@ -123,19 +126,20 @@ def init_db():
         ''')
         
         # SQLite Migrations
-        def add_sqlite_column(col, defn):
+        def add_sqlite_column(table, col, defn):
             try:
-                c.execute(f"ALTER TABLE daily_logs ADD COLUMN {col} {defn}")
-                print(f"MIGRATION: Added {col} to daily_logs (SQLite)")
+                c.execute(f"ALTER TABLE {table} ADD COLUMN {col} {defn}")
+                print(f"MIGRATION: Added {col} to {table} (SQLite)")
             except sqlite3.OperationalError:
                 pass
         
-        add_sqlite_column("timestamp", "TEXT")
-        add_sqlite_column("quantity_label", "TEXT")
-        add_sqlite_column("protein_g", "REAL")
-        add_sqlite_column("fat_g", "REAL")
-        add_sqlite_column("carbs_g", "REAL")
-        add_sqlite_column("user_id", "INTEGER")
+        add_sqlite_column("daily_logs", "timestamp", "TEXT")
+        add_sqlite_column("daily_logs", "quantity_label", "TEXT")
+        add_sqlite_column("daily_logs", "protein_g", "REAL")
+        add_sqlite_column("daily_logs", "fat_g", "REAL")
+        add_sqlite_column("daily_logs", "carbs_g", "REAL")
+        add_sqlite_column("daily_logs", "user_id", "INTEGER")
+        add_sqlite_column("users", "display_name", "TEXT")
     
     conn.commit()
     conn.close()
@@ -144,7 +148,7 @@ def init_db():
 
 # --- USER MANAGEMENT ---
 
-def create_user(email, password):
+def create_user(email, password, name=None):
     """Creates a new user. Returns user_id or None if email exists."""
     conn, db_type = get_db_connection()
     c = conn.cursor()
@@ -153,10 +157,10 @@ def create_user(email, password):
     
     try:
         if db_type == 'postgres':
-            c.execute('INSERT INTO users (email, password_hash) VALUES (%s, %s) RETURNING id', (email, password_hash))
+            c.execute('INSERT INTO users (email, password_hash, display_name) VALUES (%s, %s, %s) RETURNING id', (email, password_hash, name))
             user_id = c.fetchone()[0]
         else:
-            c.execute('INSERT INTO users (email, password_hash) VALUES (?, ?)', (email, password_hash))
+            c.execute('INSERT INTO users (email, password_hash, display_name) VALUES (?, ?, ?)', (email, password_hash, name))
             user_id = c.lastrowid
         conn.commit()
         return user_id

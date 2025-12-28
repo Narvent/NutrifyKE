@@ -32,7 +32,7 @@
             <div>
                 <h1 class="text-3xl font-bold tracking-tight">NutrifyKE 🇰🇪</h1>
                 {% if user and user.is_authenticated %}
-                <p class="text-xs opacity-80 mt-1">Logged in as {{ user.email }}</p>
+                <p class="text-xs opacity-80 mt-1">Hello, {{ user.display_name }}</p>
                 {% endif %}
             </div>
             <div class="flex items-center gap-4">
@@ -881,50 +881,50 @@
             }
         }
 
-// --- NEW MULTI-ITEM MODAL LOGIC (FIXED) ---
+        // --- NEW MULTI-ITEM MODAL LOGIC (FIXED) ---
 
-function getFoodOptionsHtml(selectedId) {
-// Sort foods alphabetically
-const sortedFoods = [...ALL_FOODS].sort((a, b) => a.name.localeCompare(b.name));
+        function getFoodOptionsHtml(selectedId) {
+            // Sort foods alphabetically
+            const sortedFoods = [...ALL_FOODS].sort((a, b) => a.name.localeCompare(b.name));
 
-return sortedFoods.map(food => {
-const isSelected = String(food.id) === String(selectedId);
-return `<option value="${food.id}" ${isSelected ? 'selected' : '' }>${food.name}</option>`;
-}).join('');
-}
+            return sortedFoods.map(food => {
+                const isSelected = String(food.id) === String(selectedId);
+                return `<option value="${food.id}" ${isSelected ? 'selected' : ''}>${food.name}</option>`;
+            }).join('');
+        }
 
-function showVerificationModal(results) {
-currentMultiAnalysis = results;
-const modal = document.getElementById('verification-modal');
-const container = document.getElementById('multi-item-container');
-const message = document.getElementById('modal-message');
+        function showVerificationModal(results) {
+            currentMultiAnalysis = results;
+            const modal = document.getElementById('verification-modal');
+            const container = document.getElementById('multi-item-container');
+            const message = document.getElementById('modal-message');
 
-// Reset state
-currentExtras.clear();
-document.querySelectorAll('#extras-menu button').forEach(b => b.classList.remove('bg-green-100', 'border-primary',
-'text-primary'));
+            // Reset state
+            currentExtras.clear();
+            document.querySelectorAll('#extras-menu button').forEach(b => b.classList.remove('bg-green-100', 'border-primary',
+                'text-primary'));
 
-// Populate list
-container.innerHTML = '';
+            // Populate list
+            container.innerHTML = '';
 
-if (results.length === 0) {
-container.innerHTML = '<p class="text-sm text-red-500">No food items identified.</p>';
-} else {
-message.innerHTML = `The AI detected <b>${results.length}</b> item(s):`;
+            if (results.length === 0) {
+                container.innerHTML = '<p class="text-sm text-red-500">No food items identified.</p>';
+            } else {
+                message.innerHTML = `The AI detected <b>${results.length}</b> item(s):`;
 
-results.forEach((item, index) => {
-const matchedId = item.matched_food ? item.matched_food.id : '';
-const servingType = item.matched_food ? item.matched_food.serving_type : 'volumetric';
+                results.forEach((item, index) => {
+                    const matchedId = item.matched_food ? item.matched_food.id : '';
+                    const servingType = item.matched_food ? item.matched_food.serving_type : 'volumetric';
 
-let inputHtml = '';
-let details = '';
+                    let inputHtml = '';
+                    let details = '';
 
-// Generate Input based on Serving Type
-if (servingType === 'countable') {
-const initialVal = item.analysis.layout.visible_count || 1;
-details = item.analysis.layout.is_stacked ? '<span class="text-xs text-orange-500 ml-2">Stack detected</span>' : '';
+                    // Generate Input based on Serving Type
+                    if (servingType === 'countable') {
+                        const initialVal = item.analysis.layout.visible_count || 1;
+                        details = item.analysis.layout.is_stacked ? '<span class="text-xs text-orange-500 ml-2">Stack detected</span>' : '';
 
-inputHtml = `
+                        inputHtml = `
 <div class="flex items-center space-x-2">
     <input type="number" id="qty-${index}" data-type="countable" value="${initialVal}" step="1" min="1"
         class="w-16 p-1 border rounded text-center font-bold text-gray-700 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none">
@@ -932,64 +932,64 @@ inputHtml = `
 </div>
 `;
 
-} else if (servingType === 'composite') {
-inputHtml = `
+                    } else if (servingType === 'composite') {
+                        inputHtml = `
 <div class="flex items-center space-x-2">
     <input type="number" id="qty-${index}" data-type="composite" value="1" step="0.5" min="0.5"
         class="w-16 p-1 border rounded text-center font-bold text-gray-700 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none">
     <span class="text-xs text-gray-500 w-12">servings</span>
 </div>
 `;
-} else {
-// Volumetric
-if (item.analysis.layout.container_type) {
-details = `<span class="text-xs text-gray-400 ml-2">${item.analysis.layout.container_type}</span>`;
-}
+                    } else {
+                        // Volumetric
+                        if (item.analysis.layout.container_type) {
+                            details = `<span class="text-xs text-gray-400 ml-2">${item.analysis.layout.container_type}</span>`;
+                        }
 
-// Determine default weight
-let defaultVal = 250;
-const portions = item.matched_food ? item.matched_food.portions : [];
+                        // Determine default weight
+                        let defaultVal = 250;
+                        const portions = item.matched_food ? item.matched_food.portions : [];
 
-if (portions && portions.length > 0) {
-// Try to find a default based on fullness
-let defaultIndex = 1; // Default to middle option
-if (item.analysis.layout.fullness_index < 0.4) {
-                    defaultIndex = 0;
-                } else if (item.analysis.layout.fullness_index > 0.8) {
-                    defaultIndex = portions.length - 1;
-                }
-    defaultVal = portions[defaultIndex].weight_g;
-    } else {
-    // Fallback to generic sizes
-    if (item.analysis.layout.fullness_index < 0.4) {
-                    defaultVal = 150;
-                } else if (item.analysis.layout.fullness_index > 0.8) {
-                    defaultVal = 400;
-                }
-        }
+                        if (portions && portions.length > 0) {
+                            // Try to find a default based on fullness
+                            let defaultIndex = 1; // Default to middle option
+                            if (item.analysis.layout.fullness_index < 0.4) {
+                                defaultIndex = 0;
+                            } else if (item.analysis.layout.fullness_index > 0.8) {
+                                defaultIndex = portions.length - 1;
+                            }
+                            defaultVal = portions[defaultIndex].weight_g;
+                        } else {
+                            // Fallback to generic sizes
+                            if (item.analysis.layout.fullness_index < 0.4) {
+                                defaultVal = 150;
+                            } else if (item.analysis.layout.fullness_index > 0.8) {
+                                defaultVal = 400;
+                            }
+                        }
 
-        inputHtml = `
+                        inputHtml = `
         <div class="flex items-center space-x-2">
             <input type="number" id="qty-${index}" data-type="volumetric" value="${defaultVal}" step="10" min="10"
                 class="w-20 p-1 border rounded text-center font-bold text-gray-700 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none">
             <span class="text-xs text-gray-500 w-8">g</span>
         </div>
         `;
-        }
+                    }
 
-        // Create Row
-        const row = document.createElement('div');
-        row.className = "flex flex-col gap-2 bg-gray-50 p-3 rounded-lg border border-gray-100";
+                    // Create Row
+                    const row = document.createElement('div');
+                    row.className = "flex flex-col gap-2 bg-gray-50 p-3 rounded-lg border border-gray-100";
 
-        // Top Row: Food Selector + Delete Button
-        const topRow = document.createElement('div');
-        topRow.className = "flex justify-between items-center w-full";
+                    // Top Row: Food Selector + Delete Button
+                    const topRow = document.createElement('div');
+                    topRow.className = "flex justify-between items-center w-full";
 
-        topRow.innerHTML = `
+                    topRow.innerHTML = `
         <div class="flex-1 mr-2">
             <select onchange="updateVerificationItem(${index}, this.value)"
                 class="w-full p-1 text-sm font-bold text-gray-800 bg-transparent border-b border-gray-300 focus:border-primary outline-none">
-                <option value="" disabled ${!matchedId ? 'selected' : '' }>Select Food...</option>
+                <option value="" disabled ${!matchedId ? 'selected' : ''}>Select Food...</option>
                 ${getFoodOptionsHtml(matchedId)}
             </select>
             ${details}
@@ -1002,100 +1002,100 @@ if (item.analysis.layout.fullness_index < 0.4) {
         </button>
         `;
 
-        // Bottom Row: Quantity Input
-        const bottomRow = document.createElement('div');
-        bottomRow.className = "flex justify-end w-full";
-        bottomRow.innerHTML = inputHtml;
+                    // Bottom Row: Quantity Input
+                    const bottomRow = document.createElement('div');
+                    bottomRow.className = "flex justify-end w-full";
+                    bottomRow.innerHTML = inputHtml;
 
-        row.appendChild(topRow);
-        row.appendChild(bottomRow);
+                    row.appendChild(topRow);
+                    row.appendChild(bottomRow);
 
-        container.appendChild(row);
-        });
-        }
+                    container.appendChild(row);
+                });
+            }
 
-        // Add "Add Item" Button
-        const addButton = document.createElement('button');
-        addButton.onclick = addVerificationItem;
-        addButton.className = "w-full py-2 mt-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-primary hover:text-primary font-semibold text-sm transition flex items-center justify-center";
-        addButton.innerHTML = `
+            // Add "Add Item" Button
+            const addButton = document.createElement('button');
+            addButton.onclick = addVerificationItem;
+            addButton.className = "w-full py-2 mt-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-primary hover:text-primary font-semibold text-sm transition flex items-center justify-center";
+            addButton.innerHTML = `
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
         Add Another Item
         `;
-        container.appendChild(addButton);
+            container.appendChild(addButton);
 
-        modal.classList.remove('hidden');
+            modal.classList.remove('hidden');
         }
 
         function updateVerificationItem(index, newFoodId) {
-        const food = ALL_FOODS.find(f => String(f.id) === String(newFoodId));
-        if (food) {
-        // Update the underlying data model
-        currentMultiAnalysis[index].matched_food = food;
-        // Reset analysis layout to defaults for the new type to avoid carry-over weirdness
-        currentMultiAnalysis[index].analysis.layout = {
-        mode: food.serving_type === 'countable' ? 'count' : 'volume',
-        visible_count: 1,
-        fullness_index: 0.5
-        };
-        // Re-render to update inputs
-        showVerificationModal(currentMultiAnalysis);
-        }
+            const food = ALL_FOODS.find(f => String(f.id) === String(newFoodId));
+            if (food) {
+                // Update the underlying data model
+                currentMultiAnalysis[index].matched_food = food;
+                // Reset analysis layout to defaults for the new type to avoid carry-over weirdness
+                currentMultiAnalysis[index].analysis.layout = {
+                    mode: food.serving_type === 'countable' ? 'count' : 'volume',
+                    visible_count: 1,
+                    fullness_index: 0.5
+                };
+                // Re-render to update inputs
+                showVerificationModal(currentMultiAnalysis);
+            }
         }
 
         function deleteVerificationItem(index) {
-        currentMultiAnalysis.splice(index, 1);
-        showVerificationModal(currentMultiAnalysis);
+            currentMultiAnalysis.splice(index, 1);
+            showVerificationModal(currentMultiAnalysis);
         }
 
         function addVerificationItem() {
-        // Add a placeholder item
-        currentMultiAnalysis.push({
-        input_food_name: "",
-        matched_food: null, // User must select
-        analysis: {
-        layout: { mode: 'volume', fullness_index: 0.5 }
-        }
-        });
-        showVerificationModal(currentMultiAnalysis);
+            // Add a placeholder item
+            currentMultiAnalysis.push({
+                input_food_name: "",
+                matched_food: null, // User must select
+                analysis: {
+                    layout: { mode: 'volume', fullness_index: 0.5 }
+                }
+            });
+            showVerificationModal(currentMultiAnalysis);
         }
 
         function toggleExtra(extra) {
-        const btn = document.getElementById(`btn-extra-${extra}`);
-        if (currentExtras.has(extra)) {
-        currentExtras.delete(extra);
-        btn.classList.remove('bg-green-100', 'border-primary', 'text-primary');
-        } else {
-        currentExtras.add(extra);
-        btn.classList.add('bg-green-100', 'border-primary', 'text-primary');
-        }
+            const btn = document.getElementById(`btn-extra-${extra}`);
+            if (currentExtras.has(extra)) {
+                currentExtras.delete(extra);
+                btn.classList.remove('bg-green-100', 'border-primary', 'text-primary');
+            } else {
+                currentExtras.add(extra);
+                btn.classList.add('bg-green-100', 'border-primary', 'text-primary');
+            }
         }
 
         async function confirmVerification() {
-        if (!currentMultiAnalysis || currentMultiAnalysis.length === 0) {
-        closeModal();
-        return;
-        }
+            if (!currentMultiAnalysis || currentMultiAnalysis.length === 0) {
+                closeModal();
+                return;
+            }
 
-        const btn = document.querySelector('button[onclick="confirmVerification()"]');
-        const originalText = btn.innerText;
-        btn.innerText = "Calculating...";
-        btn.disabled = true;
+            const btn = document.querySelector('button[onclick="confirmVerification()"]');
+            const originalText = btn.innerText;
+            btn.innerText = "Calculating...";
+            btn.disabled = true;
 
-        let combinedMeal = {
-        name_parts: [],
-        calories: 0,
-        protein_g: 0,
-        fat_g: 0,
-        carbs_g: 0
-        };
+            let combinedMeal = {
+                name_parts: [],
+                calories: 0,
+                protein_g: 0,
+                fat_g: 0,
+                carbs_g: 0
+            };
 
-        const errors = [];
+            const errors = [];
 
-        try {
-        // 1. Iterate and Calculate Totals (but don't log yet)
+            try {
+                // 1. Iterate and Calculate Totals (but don't log yet)
                 for (let i = 0; i < currentMultiAnalysis.length; i++) {
                     const item = currentMultiAnalysis[i];
                     if (!item.matched_food) continue; // Skip unselected items
@@ -1154,72 +1154,72 @@ if (item.analysis.layout.fullness_index < 0.4) {
 
                 // 3. Log the Combined Result
                 if (combinedMeal.name_parts.length > 0) {
-            const finalName = combinedMeal.name_parts.join(' + ');
+                    const finalName = combinedMeal.name_parts.join(' + ');
 
-            // Create a more descriptive quantity label
-            // e.g. "3 items" or just list the count if small
-            const itemCount = currentMultiAnalysis.filter(i => i.matched_food).length + currentExtras.size;
-            const quantityLabel = `${itemCount} item${itemCount > 1 ? 's' : ''} (Aggregated)`;
+                    // Create a more descriptive quantity label
+                    // e.g. "3 items" or just list the count if small
+                    const itemCount = currentMultiAnalysis.filter(i => i.matched_food).length + currentExtras.size;
+                    const quantityLabel = `${itemCount} item${itemCount > 1 ? 's' : ''} (Aggregated)`;
 
-            await addMealToLog({
-            name: finalName,
-            calories: Math.round(combinedMeal.calories),
-            protein_g: Math.round(combinedMeal.protein_g),
-            fat_g: Math.round(combinedMeal.fat_g),
-            carbs_g: Math.round(combinedMeal.carbs_g),
-            timestamp: new Date().toISOString(), // Send client time
-            date: currentDate // Send client date
-            }, quantityLabel);
+                    await addMealToLog({
+                        name: finalName,
+                        calories: Math.round(combinedMeal.calories),
+                        protein_g: Math.round(combinedMeal.protein_g),
+                        fat_g: Math.round(combinedMeal.fat_g),
+                        carbs_g: Math.round(combinedMeal.carbs_g),
+                        timestamp: new Date().toISOString(), // Send client time
+                        date: currentDate // Send client date
+                    }, quantityLabel);
 
-            } else if (errors.length > 0) {
-            alert(`Failed to calculate: ${errors.join(', ')}`);
-            }
+                } else if (errors.length > 0) {
+                    alert(`Failed to calculate: ${errors.join(', ')}`);
+                }
 
             } catch (error) {
-            console.error("Error logging items:", error);
-            alert("An error occurred while logging.");
+                console.error("Error logging items:", error);
+                alert("An error occurred while logging.");
             } finally {
-            closeModal();
-            btn.innerText = originalText;
-            btn.disabled = false;
+                closeModal();
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
-            }
+        }
 
-            function closeModal() {
+        function closeModal() {
             document.getElementById('verification-modal').classList.add('hidden');
-            }
+        }
 
-            // --- NEW RENDER LOGS WITH GROUPING ---
+        // --- NEW RENDER LOGS WITH GROUPING ---
 
-            function renderLogs() {
+        function renderLogs() {
             const logList = document.getElementById('log-list');
 
             // Sort logs by time (newest first).
             const sortedLogs = [...dailyLog].reverse();
 
             if (sortedLogs.length > 0) {
-            logList.innerHTML = '';
+                logList.innerHTML = '';
 
-            sortedLogs.forEach((meal) => {
-            const mealTime = meal.timestamp ? new Date(meal.timestamp) : (meal.date_logged ? new Date(meal.date_logged) : new Date());
+                sortedLogs.forEach((meal) => {
+                    const mealTime = meal.timestamp ? new Date(meal.timestamp) : (meal.date_logged ? new Date(meal.date_logged) : new Date());
 
-            // Time Formatting
-            const hours = mealTime.getHours();
-            let timeOfDay = "Morning";
-            if (hours >= 12 && hours < 17) {
-                timeOfDay = "Afternoon";
-            } else if (hours >= 17) {
-                timeOfDay = "Evening";
-            }
+                    // Time Formatting
+                    const hours = mealTime.getHours();
+                    let timeOfDay = "Morning";
+                    if (hours >= 12 && hours < 17) {
+                        timeOfDay = "Afternoon";
+                    } else if (hours >= 17) {
+                        timeOfDay = "Evening";
+                    }
 
-                const timeStr = mealTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                const fullTimeLabel = `${timeOfDay}, ${timeStr}`;
+                    const timeStr = mealTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                    const fullTimeLabel = `${timeOfDay}, ${timeStr}`;
 
-                // Create item container (Individual Card)
-                const item = document.createElement('div');
-                item.className = "bg-white border border-gray-100 rounded-xl shadow-sm mb-3 flex justify-between " +
-                "items-center p-4 hover:shadow-md transition";
-                item.innerHTML = `
+                    // Create item container (Individual Card)
+                    const item = document.createElement('div');
+                    item.className = "bg-white border border-gray-100 rounded-xl shadow-sm mb-3 flex justify-between " +
+                        "items-center p-4 hover:shadow-md transition";
+                    item.innerHTML = `
                 <div class="flex-1">
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1 flex items-center">
                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1251,44 +1251,44 @@ if (item.analysis.layout.fullness_index < 0.4) {
                     </svg>
                 </button>
                 `;
-                logList.appendChild(item);
+                    logList.appendChild(item);
                 });
-                } else {
+            } else {
                 logList.innerHTML = '<p class="text-gray-400 text-center italic py-4" id="empty-log-msg">' +
                     'No meals logged yet today.</p>';
-                }
-                }
+            }
+        }
 
-                // Initialize
-                init();
+        // Initialize
+        init();
 
-                // --- PWA INSTALL LOGIC ---
-                let deferredPrompt;
-                const installBtn = document.getElementById('install-btn');
+        // --- PWA INSTALL LOGIC ---
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
 
-                window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                if(installBtn) installBtn.classList.remove('hidden');
-                });
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (installBtn) installBtn.classList.remove('hidden');
+        });
 
-                async function installApp() {
-                if (!deferredPrompt) return;
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-                if(installBtn) installBtn.classList.add('hidden');
-                }
+        async function installApp() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            if (installBtn) installBtn.classList.add('hidden');
+        }
 
-                // Register Service Worker
-                if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
                 navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
-                .then(reg => console.log('SW registered!', reg))
-                .catch(err => console.log('SW failed', err));
-                });
-                }
-                </script>
-                </body>
+                    .then(reg => console.log('SW registered!', reg))
+                    .catch(err => console.log('SW failed', err));
+            });
+        }
+    </script>
+</body>
 
-                </html>
+</html>

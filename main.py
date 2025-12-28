@@ -51,16 +51,25 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 class User(UserMixin):
-    def __init__(self, id, email, password_hash):
+    def __init__(self, id, email, password_hash, name=None):
         self.id = id
         self.email = email
         self.password_hash = password_hash
+        self.name = name
+
+    @property
+    def display_name(self):
+        if self.name:
+            return self.name
+        return self.email.split('@')[0]
 
 @login_manager.user_loader
 def load_user(user_id):
     user_data = database_setup.get_user_by_id(user_id)
     if user_data:
-        return User(user_data['id'], user_data['email'], user_data['password_hash'])
+        # Pass display_name from DB to User object
+        name = user_data.get('display_name')
+        return User(user_data['id'], user_data['email'], user_data['password_hash'], name)
     return None
 
 # --- AUTH ROUTES ---
@@ -71,6 +80,7 @@ def register():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+        name = request.form.get('name')  # Get name input
         
         if not email or not password:
             flash('Email and password are required.')
@@ -80,7 +90,7 @@ def register():
             flash('Email already exists.')
             return redirect(url_for('register'))
             
-        user_id = database_setup.create_user(email, password)
+        user_id = database_setup.create_user(email, password, name)
         if user_id:
             user = load_user(user_id)
             login_user(user)
@@ -107,7 +117,8 @@ def login():
                  print("DEBUG: User not found in DB")
             
             if user_data and check_password_hash(user_data['password_hash'], password):
-                user = User(user_data['id'], user_data['email'], user_data['password_hash'])
+                name = user_data.get('display_name')
+                user = User(user_data['id'], user_data['email'], user_data['password_hash'], name)
                 login_user(user)
                 return redirect(url_for('home'))
             else:
