@@ -93,20 +93,33 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 @limiter.limit("10 per minute")
 def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        user_data = database_setup.get_user_by_email(email)
-        
-        if user_data and check_password_hash(user_data['password_hash'], password):
-            user = User(user_data['id'], user_data['email'], user_data['password_hash'])
-            login_user(user)
-            return redirect(url_for('home'))
-        else:
-            flash('Invalid email or password.')
+    try:
+        if request.method == 'POST':
+            email = request.form.get('email')
+            password = request.form.get('password')
             
-    return render_template('login.html')
+            print(f"DEBUG: Attempting login for {email}")
+            user_data = database_setup.get_user_by_email(email)
+            
+            if user_data:
+                 print(f"DEBUG: User found: {user_data['id']}")
+            else:
+                 print("DEBUG: User not found in DB")
+            
+            if user_data and check_password_hash(user_data['password_hash'], password):
+                user = User(user_data['id'], user_data['email'], user_data['password_hash'])
+                login_user(user)
+                return redirect(url_for('home'))
+            else:
+                flash('Invalid email or password.')
+                
+        return render_template('login.html')
+    except Exception as e:
+        print(f"CRITICAL LOGIN ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        flash(f'Login Error: {str(e)}')
+        return render_template('login.html')
 
 @app.route('/logout')
 @login_required

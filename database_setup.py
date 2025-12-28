@@ -171,10 +171,25 @@ def get_user_by_email(email):
     conn, db_type = get_db_connection()
     
     if db_type == 'postgres':
-        c = conn.cursor(cursor_factory=RealDictCursor)
-        c.execute('SELECT * FROM users WHERE email = %s', (email,))
-        user = c.fetchone()
-        if user: user = dict(user)
+        if RealDictCursor:
+             c = conn.cursor(cursor_factory=RealDictCursor)
+             c.execute('SELECT * FROM users WHERE email = %s', (email,))
+             user = c.fetchone()
+             if user: user = dict(user)
+        else:
+             # Fallback if RealDictCursor failed to import for some reason
+             c = conn.cursor()
+             c.execute('SELECT * FROM users WHERE email = %s', (email,))
+             user_tuple = c.fetchone()
+             if user_tuple:
+                 # Manually map columns (Fragile, but better than crashing)
+                 # Better to rely on the fact that we fixed the import, but let's be safe.
+                 # Actually, if we are here, psycopg2 imported but extras failed? Unlikely.
+                 # But let's handle it.
+                 desc = c.description
+                 user = {desc[i][0]: value for i, value in enumerate(user_tuple)}
+             else:
+                 user = None
     else:
         c = conn.cursor()
         c.execute('SELECT * FROM users WHERE email = ?', (email,))
