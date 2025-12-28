@@ -24,6 +24,9 @@ def get_db_connection():
     """
     if DATABASE_URL:
         # PostgreSQL Connection
+        if psycopg2 is None:
+             raise ImportError("PostgreSQL driver (psycopg2) not found, but DATABASE_URL is set. Please install 'psycopg2-binary'.")
+             
         try:
             conn = psycopg2.connect(DATABASE_URL)
             return conn, 'postgres'
