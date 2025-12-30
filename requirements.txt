@@ -10,3 +10,4 @@ email_validator
 Flask-Limiter
 psycopg2-binary
 clerk-backend-api
+python-jose[cryptography]

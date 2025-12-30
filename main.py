@@ -54,6 +54,10 @@ CLERK_FRONTEND_API = os.getenv('CLERK_FRONTEND_API') or os.getenv('CLERK_API_URL
 if CLERK_FRONTEND_API and CLERK_FRONTEND_API.startswith('http'):
     CLERK_FRONTEND_API = CLERK_FRONTEND_API.replace('https://', '').replace('http://', '').split('/')[0]
 
+# Expose to environment for clerk_auth.py
+if CLERK_FRONTEND_API:
+    os.environ['CLERK_FRONTEND_API'] = CLERK_FRONTEND_API
+
 # Support both naming conventions for Gemini
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
 
