@@ -44,7 +44,12 @@ else:
 
 # Load local data on startup
 utils.load_data()
-database_setup.init_db()
+try:
+    # Only init DB if we aren't in a transient serverless cold start if possible,
+    # or handle the read-only filesystem error gracefully.
+    database_setup.init_db()
+except Exception as e:
+    print(f"DATABASE INIT WARNING: {e}")
 
 # --- AUTHENTICATION SETUP ---
 login_manager = LoginManager()
