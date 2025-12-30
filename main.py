@@ -306,7 +306,7 @@ def analyze_image():
         food_list_str = ", ".join(food_names)
 
         prompt = f"""
-        You are an expert Kenyan Nutrition AI. Analyze the image for food intake.
+        You are an expert Afyniq Nutrition AI. Analyze the image for food intake.
         CRITICAL: GENUINE IDENTIFICATION REQUIRED
         You must identify ALL distinct foods in the image. You are RESTRICTED to choosing from the following list:
         [{food_list_str}]

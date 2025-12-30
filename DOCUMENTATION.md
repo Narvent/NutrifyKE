@@ -1,8 +1,8 @@
-# NutrifyKE Documentation 🇰🇪
+# Afyniq Documentation 🇰🇪
 
 ## Table of Contents
-- [What is NutrifyKE?](#what-is-nutrifyke)
-- [Who Can Use NutrifyKE?](#who-can-use-nutrifyke)
+- [What is Afyniq?](#what-is-Afyniq)
+- [Who Can Use Afyniq?](#who-can-use-Afyniq)
 - [Our Competitive Advantage](#our-competitive-advantage)
 - [Key Features](#key-features)
 - [How It Works](#how-it-works)
@@ -11,9 +11,9 @@
 
 ---
 
-## What is NutrifyKE?
+## What is Afyniq?
 
-**NutrifyKE** is Kenya's first AI-powered calorie tracking application designed specifically for local Kenyan foods. Unlike generic calorie trackers that struggle with dishes like Ugali, Chapati, or Sukuma Wiki, NutrifyKE understands our food culture and makes nutrition tracking as simple as taking a photo.
+**Afyniq** is Kenya's first AI-powered calorie tracking application designed specifically for local Kenyan foods. Unlike generic calorie trackers that struggle with dishes like Ugali, Chapati, or Sukuma Wiki, Afyniq understands our food culture and makes nutrition tracking as simple as taking a photo.
 
 ### The Problem We Solve
 
@@ -25,16 +25,16 @@ Traditional calorie tracking apps have three major problems for Kenyan users:
 
 ### Our Solution
 
-NutrifyKE combines:
+Afyniq combines:
 - ✅ **Comprehensive Kenyan Food Database** - 20+ local dishes with accurate nutritional data
 - ✅ **AI-Powered Food Recognition** - Just snap a photo, no manual searching
 - ✅ **Realistic Portion Sizes** - Portions that match Kenyan eating habits (e.g., "Kibanda Thick" chapati, "Fist Size" ugali)
 
 ---
 
-## Who Can Use NutrifyKE?
+## Who Can Use Afyniq?
 
-NutrifyKE is designed for **anyone in Kenya** who wants to track their nutrition, but it's especially valuable for:
+Afyniq is designed for **anyone in Kenya** who wants to track their nutrition, but it's especially valuable for:
 
 ### 🏋️ Fitness Enthusiasts
 - **Bodybuilders & Athletes**: Track macros (protein, carbs, fats) for muscle gain or cutting phases
@@ -67,7 +67,7 @@ NutrifyKE is designed for **anyone in Kenya** who wants to track their nutrition
 
 ### 🤖 AI-Powered Multi-Food Detection
 
-**This is what sets NutrifyKE apart from every other calorie tracker.**
+**This is what sets Afyniq apart from every other calorie tracker.**
 
 #### How Other Apps Work:
 1. Open app
@@ -77,7 +77,7 @@ NutrifyKE is designed for **anyone in Kenya** who wants to track their nutrition
 5. Repeat for each food item
 6. **Total time: 2-3 minutes per meal**
 
-#### How NutrifyKE Works:
+#### How Afyniq Works:
 1. Take a photo
 2. AI automatically detects ALL foods
 3. Nutrition logged instantly
@@ -111,7 +111,7 @@ Our AI uses a **3-tier fuzzy matching algorithm**:
 
 ### Comparison with Competitors
 
-| Feature | NutrifyKE | MyFitnessPal | Lose It! | Yazio |
+| Feature | Afyniq | MyFitnessPal | Lose It! | Yazio |
 |---------|-----------|--------------|----------|-------|
 | **Kenyan Foods Database** | ✅ Specialized | ❌ Limited | ❌ Limited | ❌ Limited |
 | **AI Food Recognition** | ✅ Multi-food | ✅ Single food | ✅ Single food | ✅ Single food |
@@ -293,7 +293,7 @@ graph LR
 ### Project Structure
 
 ```
-NutrifyKE/
+Afyniq/
 ├── main.py                 # Flask backend with AI integration
 ├── utils.py                # Nutrition calculation logic
 ├── food_data.json          # Kenyan food nutritional database
@@ -386,7 +386,7 @@ If only ONE food is visible, still return an array with one item.
 
 1. **Navigate to project directory**
    ```bash
-   cd NutrifyKE
+   cd Afyniq
    ```
 
 2. **Install Python dependencies**
@@ -433,7 +433,7 @@ If only ONE food is visible, still return an array with one item.
 
 ---
 
-## Why NutrifyKE is the Future of Nutrition Tracking in Kenya
+## Why Afyniq is the Future of Nutrition Tracking in Kenya
 
 ### 🚀 Innovation
 We're the **first and only** calorie tracker built specifically for Kenyan foods with AI-powered recognition.
@@ -457,7 +457,7 @@ By understanding our food culture, we make nutrition tracking **relevant and pra
 
 ## Future Enhancements
 
-We're constantly improving NutrifyKE. Planned features include:
+We're constantly improving Afyniq. Planned features include:
 
 - 📈 **Weekly/Monthly Statistics**: Track trends over time
 - 🎯 **Macro Goal Tracking**: Set targets for protein, carbs, and fats

@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NutrifyKE - Daily Tracker</title>
+    <title>Afyniq - Daily Tracker</title>
     <meta name="theme-color" content="#10B981">
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -30,7 +30,7 @@
     <header class="bg-primary text-white p-6 shadow-lg">
         <div class="container mx-auto flex justify-between items-center">
             <div>
-                <h1 class="text-3xl font-bold tracking-tight">NutrifyKE 🇰🇪</h1>
+                <h1 class="text-3xl font-bold tracking-tight">Afyniq</h1>
                 {% if user and user.is_authenticated %}
                 <p class="text-xs opacity-80 mt-1">Hello, {{ user.display_name }}</p>
                 {% endif %}

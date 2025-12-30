@@ -1,4 +1,4 @@
-# NutrifyKE 🥑
+# Afyniq 🥑
 
 A smart nutrition tracking PWA for Kenya, powered by Gemini AI.
 
@@ -37,7 +37,7 @@ To prevent abuse and manage AI costs, the following limits apply per user (by IP
 **On Desktop (Chrome/Edge):**
 1.  Open `http://localhost:5000`.
 2.  Look at the right side of the URL address bar.
-3.  You should see a small **"Install NutrifyKE"** icon (monitor with a down arrow).
+3.  You should see a small **"Install Afyniq"** icon (monitor with a down arrow).
 4.  Click it to install. It will open in its own standalone window, removing the browser interface.
 
 **On Mobile (Android - Chrome):**
