@@ -1216,13 +1216,6 @@
                     await Clerk.load();
                     // We removed the aggressive redirect here to prevent loops on Vercel.
                     // The backend (@login_required) will handle session security.
-
-                    Clerk.addListener(({ user }) => {
-                        if (!user) {
-                            console.log("Clerk session lost, signing out locally...");
-                            window.location.href = "{{ url_for('logout') }}";
-                        }
-                    });
                 }
             } catch (err) {
                 console.warn("Clerk failed to load, session check skipped.", err);

@@ -117,7 +117,7 @@ def load_user(user_id):
 # --- AUTH ROUTES ---
 
 @app.route('/login')
-@limiter.limit("10 per minute")
+@limiter.limit("50 per minute")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
@@ -126,7 +126,7 @@ def login():
                           clerk_frontend_api=CLERK_FRONTEND_API)
 
 @app.route('/register')
-@limiter.limit("10 per minute")
+@limiter.limit("50 per minute")
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
