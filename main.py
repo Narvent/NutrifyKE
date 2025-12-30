@@ -28,6 +28,13 @@ limiter = Limiter(
 # --- CONFIGURATION ---
 load_dotenv()
 
+# Vercel-friendly session settings
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+)
+
 def get_clerk_fapi(publishable_key):
     """Derives the Frontend API URL from a Clerk Publishable Key."""
     if not publishable_key: return None
