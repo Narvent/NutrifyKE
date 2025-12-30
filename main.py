@@ -12,6 +12,7 @@ import os
 import re
 from dotenv import load_dotenv
 import database_setup
+import clerk_auth
 
 app = Flask(__name__)
 
@@ -51,10 +52,10 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 class User(UserMixin):
-    def __init__(self, id, email, password_hash, name=None):
+    def __init__(self, id, email, clerk_id=None, name=None):
         self.id = id
         self.email = email
-        self.password_hash = password_hash
+        self.clerk_id = clerk_id
         self.name = name
 
     @property
@@ -67,83 +68,80 @@ class User(UserMixin):
 def load_user(user_id):
     user_data = database_setup.get_user_by_id(user_id)
     if user_data:
-        # Pass display_name from DB to User object
         name = user_data.get('display_name')
-        return User(user_data['id'], user_data['email'], user_data['password_hash'], name)
+        return User(user_data['id'], user_data['email'], user_data.get('clerk_id'), name)
     return None
 
 # --- AUTH ROUTES ---
 
-@app.route('/register', methods=['GET', 'POST'])
-@limiter.limit("10 per minute")
-def register():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        name = request.form.get('name')  # Get name input
-        
-        if not email or not password:
-            flash('Email and password are required.')
-            return redirect(url_for('register'))
-            
-        if database_setup.get_user_by_email(email):
-            flash('Email already exists.')
-            return redirect(url_for('register'))
-            
-        user_id = database_setup.create_user(email, password, name)
-        if user_id:
-            user = load_user(user_id)
-            login_user(user)
-            return redirect(url_for('home'))
-        else:
-            flash('Error creating account.')
-            
-    return render_template('register.html')
-
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login')
 @limiter.limit("10 per minute")
 def login():
-    try:
-        if request.method == 'POST':
-            email = request.form.get('email')
-            password = request.form.get('password')
-            
-            print(f"DEBUG: Attempting login for {email}")
-            user_data = database_setup.get_user_by_email(email)
-            
-            if user_data:
-                 print(f"DEBUG: User found: {user_data['id']}")
-            else:
-                 print("DEBUG: User not found in DB")
-            
-            if user_data and check_password_hash(user_data['password_hash'], password):
-                name = user_data.get('display_name')
-                user = User(user_data['id'], user_data['email'], user_data['password_hash'], name)
-                login_user(user)
-                return redirect(url_for('home'))
-            else:
-                flash('Invalid email or password.')
-                
-        return render_template('login.html')
-    except Exception as e:
-        print(f"CRITICAL LOGIN ERROR: {e}")
-        import traceback
-        traceback.print_exc()
-        flash(f'Login Error: {str(e)}')
-        return render_template('login.html')
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    return render_template('login.html', 
+                          clerk_publishable_key=os.getenv('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY') or os.getenv('CLERK_PUBLISHABLE_KEY'),
+                          clerk_frontend_api=os.getenv('CLERK_FRONTEND_API'))
+
+@app.route('/register')
+@limiter.limit("10 per minute")
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    return render_template('register.html', 
+                          clerk_publishable_key=os.getenv('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY') or os.getenv('CLERK_PUBLISHABLE_KEY'),
+                          clerk_frontend_api=os.getenv('CLERK_FRONTEND_API'))
 
 @app.route('/logout')
-@login_required
 def logout():
     logout_user()
+    # Note: Frontend handles Clerk logout, but we clear the local session too
     return redirect(url_for('login'))
+
+@app.route('/sync-user', methods=['POST'])
+def sync_user():
+    """Sync Clerk user data with local database after frontend login."""
+    data = request.json
+    clerk_id = data.get('clerk_id')
+    email = data.get('email')
+    name = data.get('name')
+    
+    if not clerk_id or not email:
+        return jsonify({"success": False, "error": "Missing user data"}), 400
+        
+    user_data = database_setup.get_user_by_clerk_id(clerk_id)
+    if not user_data:
+        # Check if user exists by email (to migrate old local users to Clerk)
+        user_data = database_setup.get_user_by_email(email)
+        if user_data:
+            # Update existing user with Clerk ID
+            conn, db_type = database_setup.get_db_connection()
+            c = conn.cursor()
+            if db_type == 'postgres':
+                c.execute('UPDATE users SET clerk_id = %s, display_name = %s WHERE id = %s', (clerk_id, name, user_data['id']))
+            else:
+                c.execute('UPDATE users SET clerk_id = ?, display_name = ? WHERE id = ?', (clerk_id, name, user_data['id']))
+            conn.commit()
+            conn.close()
+        else:
+            # Create new local record for Clerk user
+            uid = database_setup.create_user(email, name=name, clerk_id=clerk_id)
+            user_data = database_setup.get_user_by_id(uid)
+            
+    # Log in the user locally
+    user = User(user_data['id'], user_data['email'], user_data.get('clerk_id'), user_data.get('display_name'))
+    login_user(user, remember=True)
+    return jsonify({"success": True})
 
 # --- MAIN ROUTES ---
 
 @app.route('/')
 @login_required
 def home():
-    return render_template('index.html', user=current_user)
+    return render_template('index.html', 
+                          user=current_user,
+                          clerk_publishable_key=os.getenv('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY') or os.getenv('CLERK_PUBLISHABLE_KEY'),
+                          clerk_frontend_api=os.getenv('CLERK_FRONTEND_API'))
 
 @app.route('/privacy')
 def privacy():
@@ -426,7 +424,7 @@ def asset_links():
         "relation": ["delegate_permission/common.handle_all_urls"],
         "target": {
             "namespace": "android_app",
-            "package_name": "com.nutrifyke.app", # Replace with actual package name later
+            "package_name": "com.afyniq.app", # Replace with actual package name later
             "sha256_cert_fingerprints": ["..."] # Replace with actual fingerprint later
         }
     }])

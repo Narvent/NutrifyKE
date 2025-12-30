@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nutrifyke-v1';
+const CACHE_NAME = 'afyniq-v1';
 const ASSETS_TO_CACHE = [
     '/',
     '/static/manifest.json',

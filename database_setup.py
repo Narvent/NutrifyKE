@@ -12,7 +12,7 @@ except ImportError:
     print("WARNING: PostgreSQL driver not found. Running in SQLite mode.")
 
 # --- CONFIGURATION ---
-DB_NAME = "nutrify.db"
+DB_NAME = "afyniq.db"
 # Vercel provides this env var automatically for Neon/Postgres
 DATABASE_URL = os.getenv('DATABASE_URL')
 
@@ -63,7 +63,8 @@ def init_db():
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
+                password_hash TEXT,
+                clerk_id TEXT UNIQUE,
                 display_name TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -102,7 +103,8 @@ def init_db():
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
+                password_hash TEXT,
+                clerk_id TEXT UNIQUE,
                 display_name TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -140,6 +142,8 @@ def init_db():
         add_sqlite_column("daily_logs", "carbs_g", "REAL")
         add_sqlite_column("daily_logs", "user_id", "INTEGER")
         add_sqlite_column("users", "display_name", "TEXT")
+        add_sqlite_column("users", "clerk_id", "TEXT")
+        add_sqlite_column("users", "password_hash", "TEXT") # Allow null for Clerk users
     
     conn.commit()
     conn.close()
@@ -148,19 +152,21 @@ def init_db():
 
 # --- USER MANAGEMENT ---
 
-def create_user(email, password, name=None):
+def create_user(email, password=None, name=None, clerk_id=None):
     """Creates a new user. Returns user_id or None if email exists."""
     conn, db_type = get_db_connection()
     c = conn.cursor()
     
-    password_hash = generate_password_hash(password)
+    password_hash = generate_password_hash(password) if password else None
     
     try:
         if db_type == 'postgres':
-            c.execute('INSERT INTO users (email, password_hash, display_name) VALUES (%s, %s, %s) RETURNING id', (email, password_hash, name))
+            c.execute('INSERT INTO users (email, password_hash, display_name, clerk_id) VALUES (%s, %s, %s, %s) RETURNING id', 
+                      (email, password_hash, name, clerk_id))
             user_id = c.fetchone()[0]
         else:
-            c.execute('INSERT INTO users (email, password_hash, display_name) VALUES (?, ?, ?)', (email, password_hash, name))
+            c.execute('INSERT INTO users (email, password_hash, display_name, clerk_id) VALUES (?, ?, ?, ?)', 
+                      (email, password_hash, name, clerk_id))
             user_id = c.lastrowid
         conn.commit()
         return user_id
@@ -169,6 +175,24 @@ def create_user(email, password, name=None):
         return None
     finally:
         conn.close()
+
+def get_user_by_clerk_id(clerk_id):
+    """Returns user dict or None by Clerk ID."""
+    conn, db_type = get_db_connection()
+    
+    if db_type == 'postgres':
+        c = conn.cursor(cursor_factory=RealDictCursor)
+        c.execute('SELECT * FROM users WHERE clerk_id = %s', (clerk_id,))
+        user = c.fetchone()
+        if user: user = dict(user)
+    else:
+        c = conn.cursor()
+        c.execute('SELECT * FROM users WHERE clerk_id = ?', (clerk_id,))
+        user = c.fetchone()
+        if user: user = dict(user)
+        
+    conn.close()
+    return user
 
 def get_user_by_email(email):
     """Returns user dict or None."""

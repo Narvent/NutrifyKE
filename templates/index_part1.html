@@ -4,13 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NutrifyKE - Daily Tracker</title>
+    <title>Afyniq - Daily Tracker</title>
     <meta name="theme-color" content="#10B981">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script async crossorigin="anonymous"
+        src="https://{{ clerk_frontend_api }}/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+        data-clerk-publishable-key="{{ clerk_publishable_key }}">
+        </script>
     <script>
         tailwind.config = {
             theme: {
@@ -30,7 +34,7 @@
     <header class="bg-primary text-white p-6 shadow-lg">
         <div class="container mx-auto flex justify-between items-center">
             <div>
-                <h1 class="text-3xl font-bold tracking-tight">NutrifyKE 🇰🇪</h1>
+                <h1 class="text-3xl font-bold tracking-tight">Afyniq</h1>
                 {% if user and user.is_authenticated %}
                 <p class="text-xs opacity-80 mt-1">Logged in as {{ user.email }}</p>
                 {% endif %}
@@ -45,10 +49,10 @@
                     <p class="text-4xl font-extrabold" id="total-calories">0</p>
                 </div>
                 {% if user and user.is_authenticated %}
-                <a href="{{ url_for('logout') }}"
-                    class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                <button onclick="handleSignOut()"
+                    class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
                     Logout
-                </a>
+                </button>
                 {% endif %}
             </div>
         </div>
@@ -870,3 +874,13 @@
                     }
                 } catch (error) {
                     console.error(error);
+                    alert("Failed to analyze image. Please try again.");
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                } finally {
+                    // Hide loading overlay
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    input.value = ''; // Reset input
+                }
+            }
+        }
