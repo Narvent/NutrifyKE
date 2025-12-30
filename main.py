@@ -10,6 +10,7 @@ import json
 import io
 import os
 import re
+import base64
 from dotenv import load_dotenv
 import database_setup
 import clerk_auth
@@ -26,13 +27,34 @@ limiter = Limiter(
 
 # --- CONFIGURATION ---
 load_dotenv()
-app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-prod') # Required for session
 
-# Support both naming conventions
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') 
+def get_clerk_fapi(publishable_key):
+    """Derives the Frontend API URL from a Clerk Publishable Key."""
+    if not publishable_key: return None
+    try:
+        parts = publishable_key.split('_')
+        if len(parts) < 3: return None
+        # The data is the portion after the second underscore and before the suffix
+        encoded = parts[2].split('$')[0]
+        padding = '=' * (4 - (len(encoded) % 4))
+        decoded = base64.b64decode(encoded + padding).decode('utf-8')
+        return decoded.rstrip('$')
+    except Exception:
+        return None
+
+# Support both naming conventions for secret key
+SECRET_KEY = os.getenv('CLERK_SECRET_KEY') or os.getenv('SECRET_KEY') or 'dev-secret-key-change-in-prod'
+app.secret_key = SECRET_KEY
+
+# Clerk Frontend Config
+CLERK_PUBLISHABLE_KEY = os.getenv('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY') or os.getenv('CLERK_PUBLISHABLE_KEY') or os.getenv('PUBLIC_KEY')
+CLERK_FRONTEND_API = os.getenv('CLERK_FRONTEND_API') or os.getenv('CLERK_API_URL') or get_clerk_fapi(CLERK_PUBLISHABLE_KEY)
+
+# Support both naming conventions for Gemini
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
 
 if not GEMINI_API_KEY:
-    print("WARNING: GEMINI_API_KEY (or GOOGLE_API_KEY) not found. AI features will not work.")
+    print("WARNING: GEMINI_API_KEY not found. AI features will not work.")
     client = None
 else:
     try:
@@ -44,11 +66,12 @@ else:
 # Load local data on startup
 utils.load_data()
 try:
-    # Only init DB if we aren't in a transient serverless cold start if possible,
-    # or handle the read-only filesystem error gracefully.
+    # On Vercel, the filesystem is read-only except /tmp
+    # We wrap this to prevent crash if DB init attempts to write to the project root
     database_setup.init_db()
 except Exception as e:
     print(f"DATABASE INIT WARNING: {e}")
+    # If using Postgres (Neon), this should still work. If SQLite, it might fail if file doesn't exist.
 
 # --- AUTHENTICATION SETUP ---
 login_manager = LoginManager()
@@ -84,8 +107,8 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     return render_template('login.html', 
-                          clerk_publishable_key=os.getenv('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY') or os.getenv('CLERK_PUBLISHABLE_KEY'),
-                          clerk_frontend_api=os.getenv('CLERK_FRONTEND_API'))
+                          clerk_publishable_key=CLERK_PUBLISHABLE_KEY,
+                          clerk_frontend_api=CLERK_FRONTEND_API)
 
 @app.route('/register')
 @limiter.limit("10 per minute")
@@ -93,8 +116,8 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     return render_template('register.html', 
-                          clerk_publishable_key=os.getenv('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY') or os.getenv('CLERK_PUBLISHABLE_KEY'),
-                          clerk_frontend_api=os.getenv('CLERK_FRONTEND_API'))
+                          clerk_publishable_key=CLERK_PUBLISHABLE_KEY,
+                          clerk_frontend_api=CLERK_FRONTEND_API)
 
 @app.route('/logout')
 def logout():
@@ -144,8 +167,8 @@ def sync_user():
 def home():
     return render_template('index.html', 
                           user=current_user,
-                          clerk_publishable_key=os.getenv('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY') or os.getenv('CLERK_PUBLISHABLE_KEY'),
-                          clerk_frontend_api=os.getenv('CLERK_FRONTEND_API'))
+                          clerk_publishable_key=CLERK_PUBLISHABLE_KEY,
+                          clerk_frontend_api=CLERK_FRONTEND_API)
 
 @app.route('/privacy')
 def privacy():

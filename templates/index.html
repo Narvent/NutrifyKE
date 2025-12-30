@@ -12,10 +12,12 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <script src="https://cdn.tailwindcss.com"></script>
+    {% if clerk_frontend_api and clerk_publishable_key %}
     <script async crossorigin="anonymous"
         src="https://{{ clerk_frontend_api }}/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
         data-clerk-publishable-key="{{ clerk_publishable_key }}">
         </script>
+    {% endif %}
     <script>
         tailwind.config = {
             theme: {
@@ -886,96 +888,95 @@
             }
         }// --- NEW MULTI-ITEM MODAL LOGIC (FIXED) ---
 
-function getFoodOptionsHtml(selectedId) {
-const sortedFoods = [...ALL_FOODS].sort((a, b) => a.name.localeCompare(b.name));
-return sortedFoods.map(food => {
-const isSelected = String(food.id) === String(selectedId);
-return `<option value="${food.id}" ${isSelected ? 'selected' : '' }>${food.name}</option>`;
-}).join('');
-}
+        function getFoodOptionsHtml(selectedId) {
+            const sortedFoods = [...ALL_FOODS].sort((a, b) => a.name.localeCompare(b.name));
+            return sortedFoods.map(food => {
+                const isSelected = String(food.id) === String(selectedId);
+                return `<option value="${food.id}" ${isSelected ? 'selected' : ''}>${food.name}</option>`;
+            }).join('');
+        }
 
-function showVerificationModal(results) {
-currentMultiAnalysis = results;
-const modal = document.getElementById('verification-modal');
-const container = document.getElementById('multi-item-container');
-const message = document.getElementById('modal-message');
+        function showVerificationModal(results) {
+            currentMultiAnalysis = results;
+            const modal = document.getElementById('verification-modal');
+            const container = document.getElementById('multi-item-container');
+            const message = document.getElementById('modal-message');
 
-currentExtras.clear();
-document.querySelectorAll('#extras-menu button').forEach(b => {
-b.classList.remove('bg-green-100', 'border-primary', 'text-primary');
-});
+            currentExtras.clear();
+            document.querySelectorAll('#extras-menu button').forEach(b => {
+                b.classList.remove('bg-green-100', 'border-primary', 'text-primary');
+            });
 
-container.innerHTML = '';
+            container.innerHTML = '';
 
-if (results.length === 0) {
-container.innerHTML = '<p class="text-sm text-red-500">No food items identified.</p>';
-} else {
-message.innerHTML = `The AI detected <b>${results.length}</b> item(s):`;
+            if (results.length === 0) {
+                container.innerHTML = '<p class="text-sm text-red-500">No food items identified.</p>';
+            } else {
+                message.innerHTML = `The AI detected <b>${results.length}</b> item(s):`;
 
-results.forEach((item, index) => {
-const matchedId = item.matched_food ? item.matched_food.id : '';
-const servingType = item.matched_food ? item.matched_food.serving_type : 'volumetric';
+                results.forEach((item, index) => {
+                    const matchedId = item.matched_food ? item.matched_food.id : '';
+                    const servingType = item.matched_food ? item.matched_food.serving_type : 'volumetric';
 
-let inputHtml = '';
-let details = '';
+                    let inputHtml = '';
+                    let details = '';
 
-if (servingType === 'countable') {
-const initialVal = item.analysis.layout.visible_count || 1;
-details = item.analysis.layout.is_stacked ? `<span class="text-xs text-orange-500 ml-2">Stack detected</span>` : '';
-inputHtml = `
+                    if (servingType === 'countable') {
+                        const initialVal = item.analysis.layout.visible_count || 1;
+                        details = item.analysis.layout.is_stacked ? `<span class="text-xs text-orange-500 ml-2">Stack detected</span>` : '';
+                        inputHtml = `
 <div class="flex items-center space-x-2">
     <input type="number" id="qty-` + index + `" data-type="countable" value="` + initialVal + `" step="1" min="1"
         class="w-16 p-1 border rounded text-center font-bold text-gray-700 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none">
     <span class="text-xs text-gray-500 w-12">pieces</span>
 </div>`;
-} else if (servingType === 'composite') {
-inputHtml = `
+                    } else if (servingType === 'composite') {
+                        inputHtml = `
 <div class="flex items-center space-x-2">
     <input type="number" id="qty-` + index + `" data-type="composite" value="1" step="0.5" min="0.5"
         class="w-16 p-1 border rounded text-center font-bold text-gray-700 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none">
     <span class="text-xs text-gray-500 w-12">servings</span>
 </div>`;
-} else {
-if (item.analysis.layout.container_type) {
-details = `<span class="text-xs text-gray-400 ml-2">${item.analysis.layout.container_type}</span>`;
-}
-let defaultVal = 250;
-const portions = item.matched_food ? item.matched_food.portions : [];
-if (portions && portions.length > 0) {
-let defaultIndex = 1;
-if (item.analysis.layout.fullness_index < 0.4) defaultIndex=0; else if (item.analysis.layout.fullness_index> 0.8)
-    defaultIndex = portions.length - 1;
-    defaultVal = portions[defaultIndex].weight_g;
-    } else {
-    if (item.analysis.layout.fullness_index < 0.4) defaultVal=150; else if (item.analysis.layout.fullness_index> 0.8)
-        defaultVal = 400;
-        }
-        inputHtml = `
+                    } else {
+                        if (item.analysis.layout.container_type) {
+                            details = `<span class="text-xs text-gray-400 ml-2">${item.analysis.layout.container_type}</span>`;
+                        }
+                        let defaultVal = 250;
+                        const portions = item.matched_food ? item.matched_food.portions : [];
+                        if (portions && portions.length > 0) {
+                            let defaultIndex = 1;
+                            if (item.analysis.layout.fullness_index < 0.4) defaultIndex = 0; else if (item.analysis.layout.fullness_index > 0.8)
+                                defaultIndex = portions.length - 1;
+                            defaultVal = portions[defaultIndex].weight_g;
+                        } else {
+                            if (item.analysis.layout.fullness_index < 0.4) defaultVal = 150; else if (item.analysis.layout.fullness_index > 0.8)
+                                defaultVal = 400;
+                        }
+                        inputHtml = `
         <div class="flex items-center space-x-2">
             <input type="number" id="qty-` + index + `" data-type="volumetric" value="` + defaultVal + `" step="10"
                 min="10"
                 class="w-20 p-1 border rounded text-center font-bold text-gray-700 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none">
             <span class="text-xs text-gray-500 w-8">g</span>
         </div>`;
-        }
+                    }
 
-        const row = document.createElement('div');
-        row.className = "flex flex-col gap-2 bg-gray-50 p-3 rounded-lg border border-gray-100";
-        const topRow = document.createElement('div');
-        topRow.className = "flex justify-between items-center w-full";
+                    const row = document.createElement('div');
+                    row.className = "flex flex-col gap-2 bg-gray-50 p-3 rounded-lg border border-gray-100";
+                    const topRow = document.createElement('div');
+                    topRow.className = "flex justify-between items-center w-full";
 
-        // Critical Fix: Breaking out of template literal for function calls in tags
-        let selectTag = '<select onchange="updateVerificationItem(' + index + ', this.value)" ';
-            selectTag += '
-            class="w-full p-1 text-sm font-bold text-gray-800 bg-transparent border-b border-gray-300 focus:border-primary outline-none">';
+                    // Critical Fix: Breaking out of template literal for function calls in tags
+                    let selectTag = '<select onchange="updateVerificationItem(' + index + ', this.value)" ';
+                    selectTag += 'class="w-full p-1 text-sm font-bold text-gray-800 bg-transparent border-b border-gray-300 focus:border-primary outline-none">';
 
-            let deleteBtnTag = '<button onclick="deleteVerificationItem(' + index + ')" ';
-            deleteBtnTag += ' class="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-red-50 transition">';
+                    let deleteBtnTag = '<button onclick="deleteVerificationItem(' + index + ')" ';
+                    deleteBtnTag += 'class="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-red-50 transition">';
 
-                topRow.innerHTML = `
+                    topRow.innerHTML = `
                 <div class="flex-1 mr-2">
                     ` + selectTag + `
-                    <option value="" disabled ${!matchedId ? 'selected' : '' }>Select Food...</option>
+                    <option value="" disabled ${!matchedId ? 'selected' : ''}>Select Food...</option>
                     ${getFoodOptionsHtml(matchedId)}
         </select>
         ${details}
@@ -986,148 +987,162 @@ if (item.analysis.layout.fullness_index < 0.4) defaultIndex=0; else if (item.ana
         </svg>
         </button>`;
 
-        const bottomRow = document.createElement('div');
-        bottomRow.className = "flex justify-end w-full";
-        bottomRow.innerHTML = inputHtml;
-        row.appendChild(topRow);
-        row.appendChild(bottomRow);
-        container.appendChild(row);
-        });
-        }
+                    const bottomRow = document.createElement('div');
+                    bottomRow.className = "flex justify-end w-full";
+                    bottomRow.innerHTML = inputHtml;
+                    row.appendChild(topRow);
+                    row.appendChild(bottomRow);
+                    container.appendChild(row);
+                });
+            }
 
-        const addButton = document.createElement('button');
-        addButton.onclick = addVerificationItem;
-        addButton.className = "w-full py-2 mt-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500
-        hover:border-primary hover:text-primary font-semibold text-sm transition flex items-center justify-center";
-        addButton.innerHTML = `
+            const addButton = document.createElement('button');
+            addButton.onclick = addVerificationItem;
+            addButton.className = "w-full py-2 mt-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-primary hover:text-primary font-semibold text-sm transition flex items-center justify-center";
+            addButton.innerHTML = `
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
         Add Another Item`;
-        container.appendChild(addButton);
-        modal.classList.remove('hidden');
+            container.appendChild(addButton);
+            modal.classList.remove('hidden');
         }
 
         function updateVerificationItem(index, newFoodId) {
-        const food = ALL_FOODS.find(f => String(f.id) === String(newFoodId));
-        if (food) {
-        currentMultiAnalysis[index].matched_food = food;
-        currentMultiAnalysis[index].analysis.layout = {
-        mode: food.serving_type === 'countable' ? 'count' : 'volume',
-        visible_count: 1,
-        fullness_index: 0.5
-        };
-        showVerificationModal(currentMultiAnalysis);
-        }
+            const food = ALL_FOODS.find(f => String(f.id) === String(newFoodId));
+            if (food) {
+                currentMultiAnalysis[index].matched_food = food;
+                currentMultiAnalysis[index].analysis.layout = {
+                    mode: food.serving_type === 'countable' ? 'count' : 'volume',
+                    visible_count: 1,
+                    fullness_index: 0.5
+                };
+                showVerificationModal(currentMultiAnalysis);
+            }
         }
 
         function deleteVerificationItem(index) {
-        currentMultiAnalysis.splice(index, 1);
-        showVerificationModal(currentMultiAnalysis);
+            currentMultiAnalysis.splice(index, 1);
+            showVerificationModal(currentMultiAnalysis);
         }
 
         function addVerificationItem() {
-        currentMultiAnalysis.push({
-        input_food_name: "",
-        matched_food: null,
-        analysis: { layout: { mode: 'volume', fullness_index: 0.5 } }
-        });
-        showVerificationModal(currentMultiAnalysis);
+            currentMultiAnalysis.push({
+                input_food_name: "",
+                matched_food: null,
+                analysis: { layout: { mode: 'volume', fullness_index: 0.5 } }
+            });
+            showVerificationModal(currentMultiAnalysis);
         }
 
         function toggleExtra(extra) {
-        const btn = document.getElementById(`btn-extra-` + extra);
-        if (currentExtras.has(extra)) {
-        currentExtras.delete(extra);
-        btn.classList.remove('bg-green-100', 'border-primary', 'text-primary');
-        } else {
-        currentExtras.add(extra);
-        btn.classList.add('bg-green-100', 'border-primary', 'text-primary');
-        }
+            const btn = document.getElementById(`btn-extra-` + extra);
+            if (currentExtras.has(extra)) {
+                currentExtras.delete(extra);
+                btn.classList.remove('bg-green-100', 'border-primary', 'text-primary');
+            } else {
+                currentExtras.add(extra);
+                btn.classList.add('bg-green-100', 'border-primary', 'text-primary');
+            }
         }
 
         async function confirmVerification() {
-        if (!currentMultiAnalysis || currentMultiAnalysis.length === 0) {
-        closeModal();
-        return;
-        }
-        const btn = document.querySelector('button[onclick="confirmVerification()"]');
-        const originalText = btn.innerText;
-        btn.innerText = "Calculating...";
-        btn.disabled = true;
-
-        let combinedMeal = { name_parts: [], calories: 0, protein_g: 0, fat_g: 0, carbs_g: 0 };
-        const errors = [];
-
-        try {
-        for (let i = 0; i < currentMultiAnalysis.length; i++) { const item=currentMultiAnalysis[i]; if
-            (!item.matched_food) continue; const inputEl=document.getElementById(`qty-` + i); const
-            quantity=parseFloat(inputEl.value); const response=await fetch('/calculate', { method: 'POST' , headers:
-            { 'Content-Type' : 'application/json' }, body: JSON.stringify({ id: item.matched_food.id, quantity:
-            quantity, serving_type: item.matched_food.serving_type || 'volumetric' }) }); if (!response.ok) {
-            errors.push(item.matched_food.name); continue; } const data=await response.json(); combinedMeal.calories
-            +=data.calories; combinedMeal.protein_g +=data.protein_g; combinedMeal.fat_g +=data.fat_g;
-            combinedMeal.carbs_g +=data.carbs_g; combinedMeal.name_parts.push(data.name); } const
-            EXTRA_DATA={ 'kachumbari' : { name: 'Kachumbari' , calories: 30, protein_g: 1, fat_g: 0, carbs_g: 5
-            }, 'mayo' : { name: 'Mayonnaise' , calories: 90, protein_g: 0, fat_g: 10, carbs_g: 0 }, 'ketchup' : {
-            name: 'Ketchup' , calories: 20, protein_g: 0, fat_g: 0, carbs_g: 5 }, 'avocado' : { name: 'Avocado (Slice)'
-            , calories: 50, protein_g: 1, fat_g: 5, carbs_g: 3 } }; for (const extraKey of currentExtras) { const
-            extra=EXTRA_DATA[extraKey]; if (extra) { combinedMeal.name_parts.push(extra.name); combinedMeal.calories
-            +=extra.calories; combinedMeal.protein_g +=extra.protein_g; combinedMeal.fat_g +=extra.fat_g;
-            combinedMeal.carbs_g +=extra.carbs_g; } } if (combinedMeal.name_parts.length> 0) {
-            const finalName = combinedMeal.name_parts.join(' + ');
-            const itemCount = currentMultiAnalysis.filter(i => i.matched_food).length + currentExtras.size;
-            const quantityLabel = itemCount + ' item' + (itemCount > 1 ? 's' : '') + ' (Aggregated)';
-            await addMealToLog({
-            name: finalName,
-            calories: Math.round(combinedMeal.calories),
-            protein_g: Math.round(combinedMeal.protein_g),
-            fat_g: Math.round(combinedMeal.fat_g),
-            carbs_g: Math.round(combinedMeal.carbs_g),
-            timestamp: new Date().toISOString(),
-            date: currentDate
-            }, quantityLabel);
-            } else if (errors.length > 0) {
-            alert(`Failed to calculate: ${errors.join(', ')}`);
+            if (!currentMultiAnalysis || currentMultiAnalysis.length === 0) {
+                closeModal();
+                return;
             }
+            const btn = document.querySelector('button[onclick="confirmVerification()"]');
+            const originalText = btn.innerText;
+            btn.innerText = "Calculating...";
+            btn.disabled = true;
+
+            let combinedMeal = { name_parts: [], calories: 0, protein_g: 0, fat_g: 0, carbs_g: 0 };
+            const errors = [];
+
+            try {
+                for (let i = 0; i < currentMultiAnalysis.length; i++) {
+                    const item = currentMultiAnalysis[i]; if
+                        (!item.matched_food) continue; const inputEl = document.getElementById(`qty-` + i); const
+                            quantity = parseFloat(inputEl.value); const response = await fetch('/calculate', {
+                                method: 'POST', headers:
+                                    { 'Content-Type': 'application/json' }, body: JSON.stringify({
+                                        id: item.matched_food.id, quantity:
+                                            quantity, serving_type: item.matched_food.serving_type || 'volumetric'
+                                    })
+                            }); if (!response.ok) {
+                                errors.push(item.matched_food.name); continue;
+                            } const data = await response.json(); combinedMeal.calories
+                                += data.calories; combinedMeal.protein_g += data.protein_g; combinedMeal.fat_g += data.fat_g;
+                    combinedMeal.carbs_g += data.carbs_g; combinedMeal.name_parts.push(data.name);
+                } const
+                    EXTRA_DATA = {
+                        'kachumbari': {
+                            name: 'Kachumbari', calories: 30, protein_g: 1, fat_g: 0, carbs_g: 5
+                        }, 'mayo': { name: 'Mayonnaise', calories: 90, protein_g: 0, fat_g: 10, carbs_g: 0 }, 'ketchup': {
+                            name: 'Ketchup', calories: 20, protein_g: 0, fat_g: 0, carbs_g: 5
+                        }, 'avocado': {
+                            name: 'Avocado (Slice)'
+                            , calories: 50, protein_g: 1, fat_g: 5, carbs_g: 3
+                        }
+                    }; for (const extraKey of currentExtras) {
+                        const
+                            extra = EXTRA_DATA[extraKey]; if (extra) {
+                                combinedMeal.name_parts.push(extra.name); combinedMeal.calories
+                                    += extra.calories; combinedMeal.protein_g += extra.protein_g; combinedMeal.fat_g += extra.fat_g;
+                                combinedMeal.carbs_g += extra.carbs_g;
+                            }
+                    } if (combinedMeal.name_parts.length > 0) {
+                        const finalName = combinedMeal.name_parts.join(' + ');
+                        const itemCount = currentMultiAnalysis.filter(i => i.matched_food).length + currentExtras.size;
+                        const quantityLabel = itemCount + ' item' + (itemCount > 1 ? 's' : '') + ' (Aggregated)';
+                        await addMealToLog({
+                            name: finalName,
+                            calories: Math.round(combinedMeal.calories),
+                            protein_g: Math.round(combinedMeal.protein_g),
+                            fat_g: Math.round(combinedMeal.fat_g),
+                            carbs_g: Math.round(combinedMeal.carbs_g),
+                            timestamp: new Date().toISOString(),
+                            date: currentDate
+                        }, quantityLabel);
+                    } else if (errors.length > 0) {
+                        alert(`Failed to calculate: ${errors.join(', ')}`);
+                    }
             } catch (error) {
-            console.error("Error logging items:", error);
-            alert("An error occurred while logging.");
+                console.error("Error logging items:", error);
+                alert("An error occurred while logging.");
             } finally {
-            closeModal();
-            btn.innerText = originalText;
-            btn.disabled = false;
+                closeModal();
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
-            }
+        }
 
-            function closeModal() {
+        function closeModal() {
             document.getElementById('verification-modal').classList.add('hidden');
-            }
+        }
 
-            function renderLogs() {
+        function renderLogs() {
             const logList = document.getElementById('log-list');
             const sortedLogs = [...dailyLog].reverse();
             if (sortedLogs.length > 0) {
-            logList.innerHTML = '';
-            sortedLogs.forEach((meal) => {
-            const mealTime = meal.timestamp ? new Date(meal.timestamp) : (meal.date_logged ? new Date(meal.date_logged)
-            : new Date());
-            const hours = mealTime.getHours();
-            let timeOfDay = "Morning";
-            if (hours >= 12 && hours < 17) timeOfDay="Afternoon" ; else if (hours>= 17) timeOfDay = "Evening";
+                logList.innerHTML = '';
+                sortedLogs.forEach((meal) => {
+                    const mealTime = meal.timestamp ? new Date(meal.timestamp) : (meal.date_logged ? new Date(meal.date_logged)
+                        : new Date());
+                    const hours = mealTime.getHours();
+                    let timeOfDay = "Morning";
+                    if (hours >= 12 && hours < 17) timeOfDay = "Afternoon"; else if (hours >= 17) timeOfDay = "Evening";
 
-                const timeStr = mealTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true
-                });
-                const fullTimeLabel = timeOfDay + ", " + timeStr;
-                const item = document.createElement('div');
-                item.className = "bg-white border border-gray-100 rounded-xl shadow-sm mb-3 flex justify-between
-                items-center p-4 hover:shadow-md transition";
+                    const timeStr = mealTime.toLocaleTimeString('en-US', {
+                        hour: 'numeric', minute: '2-digit', hour12: true
+                    });
+                    const fullTimeLabel = timeOfDay + ", " + timeStr;
+                    const item = document.createElement('div');
+                    item.className = "bg-white border border-gray-100 rounded-xl shadow-sm mb-3 flex justify-between items-center p-4 hover:shadow-md transition";
 
-                // Critical Fix for log delete button
-                let deleteBtnTag = '<button onclick="deleteMeal(' + meal.id + ')" ';
-            deleteBtnTag += '
-                    class="ml-2 text-gray-300 hover:text-red-500 transition-colors cursor-pointer p-2 rounded-full hover:bg-red-50" ';
-            deleteBtnTag += ' title="Delete meal">';
+                    // Critical Fix for log delete button
+                    let deleteBtnTag = '<button onclick="deleteMeal(' + meal.id + ')" ';
+                    deleteBtnTag += 'class="ml-2 text-gray-300 hover:text-red-500 transition-colors cursor-pointer p-2 rounded-full hover:bg-red-50" title="Delete meal">';
 
                     item.innerHTML = `
                     <div class="flex-1">
@@ -1156,56 +1171,59 @@ if (item.analysis.layout.fullness_index < 0.4) defaultIndex=0; else if (item.ana
                         </path>
                     </svg>
                 </button>`;
-                logList.appendChild(item);
+                    logList.appendChild(item);
                 });
-                } else {
-                logList.innerHTML = '<p class="text-gray-400 text-center italic py-4" id="empty-log-msg">No meals logged
-                    yet today.</p>';
-                }
-                }
+            } else {
+                logList.innerHTML = '<p class="text-gray-400 text-center italic py-4" id="empty-log-msg">No meals logged yet today.</p>';
+            }
+        }
 
-                init();
+        init();
 
-                let deferredPrompt;
-                const installBtn = document.getElementById('install-btn');
-                window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                if (installBtn) installBtn.classList.remove('hidden');
-                });
-                async function installApp() {
-                if (!deferredPrompt) return;
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-                if (installBtn) installBtn.classList.add('hidden');
-                }
-                if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (installBtn) installBtn.classList.remove('hidden');
+        });
+        async function installApp() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            if (installBtn) installBtn.classList.add('hidden');
+        }
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
                 navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
-                .then(reg => console.log('SW registered!', reg))
-                .catch(err => console.log('SW failed', err));
-                });
-                }
+                    .then(reg => console.log('SW registered!', reg))
+                    .catch(err => console.log('SW failed', err));
+            });
+        }
 
-                async function handleSignOut() {
-                if (typeof Clerk !== 'undefined' && Clerk.isReady()) {
+        async function handleSignOut() {
+            if (typeof Clerk !== 'undefined' && Clerk.isReady()) {
                 await Clerk.signOut();
-                }
-                window.location.href = "{{ url_for('logout') }}";
-                }
+            }
+            window.location.href = "{{ url_for('logout') }}";
+        }
 
-                // Initialize Clerk on the main page for session monitoring
-                window.addEventListener('load', async function() {
+        // Initialize Clerk on the main page for session monitoring
+        window.addEventListener('load', async function () {
+            try {
                 if (typeof Clerk !== 'undefined') {
-                await Clerk.load();
-                if (!Clerk.user) {
-                // If Clerk session is lost but local session exists, kick to login
-                window.location.href = "{{ url_for('logout') }}";
+                    await Clerk.load();
+                    if (!Clerk.user) {
+                        // If Clerk session is lost but local session exists, kick to login
+                        window.location.href = "{{ url_for('logout') }}";
+                    }
                 }
-                }
-                });
-                </script>
-                </body>
+            } catch (err) {
+                console.warn("Clerk failed to load, session check skipped.", err);
+            }
+        });
+    </script>
+</body>
 
-                </html>
+</html>

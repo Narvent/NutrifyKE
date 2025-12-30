@@ -31,34 +31,66 @@
 
 <body class="bg-gray-50 flex items-center justify-center min-h-screen px-4">
     <div class="w-full max-w-md">
+        <!-- Error Container (Hidden by default) -->
+        <div id="config-error" class="hidden bg-red-50 border border-red-200 p-6 rounded-xl text-center">
+            <div class="text-red-500 mb-4">
+                <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Configuration Missing</h2>
+            <p class="text-gray-600 text-sm mb-4">
+                The application is missing some required security keys (Clerk). 
+                If you are the developer, please ensure <code>PUBLIC_KEY</code> and <code>CLERK_FRONTEND_API</code> are set in Vercel.
+            </p>
+            <a href="/" class="text-indigo-600 hover:underline font-medium">Try reloading</a>
+        </div>
+
         <div id="sign-in"></div>
     </div>
 
+    {% if clerk_frontend_api and clerk_publishable_key %}
     <script async crossorigin="anonymous"
         src="https://{{ clerk_frontend_api }}/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
         data-clerk-publishable-key="{{ clerk_publishable_key }}">
-        </script>
-
+    </script>
     <script>
         window.addEventListener('load', async function () {
-            await Clerk.load();
+            try {
+                if (typeof Clerk === 'undefined') {
+                    throw new Error('Clerk not loaded');
+                }
+                await Clerk.load();
 
-            if (Clerk.user) {
-                // User is already signed in at Clerk level
-                await syncAndRedirect(Clerk.user);
-            } else {
-                Clerk.mountSignIn(document.getElementById('sign-in'), {
-                    appearance: {
-                        variables: { colorPrimary: '#059669' },
-                    },
-                    afterSignInUrl: '#', // We handle redirect via JS
-                });
+                if (Clerk.user) {
+                    await syncAndRedirect(Clerk.user);
+                } else {
+                    Clerk.mountSignIn(document.getElementById('sign-in'), {
+                        appearance: {
+                            variables: { colorPrimary: '#059669' },
+                        },
+                        afterSignInUrl: '#', 
+                    });
 
-                Clerk.addListener(({ user }) => {
-                    if (user) syncAndRedirect(user);
-                });
+                    Clerk.addListener(({ user }) => {
+                        if (user) syncAndRedirect(user);
+                    });
+                }
+            } catch (err) {
+                console.error("Clerk Init Error:", err);
+                document.getElementById('sign-in').classList.add('hidden');
+                document.getElementById('config-error').classList.remove('hidden');
             }
         });
+    </script>
+    {% else %}
+    <script>
+        window.addEventListener('load', function() {
+            document.getElementById('sign-in').classList.add('hidden');
+            document.getElementById('config-error').classList.remove('hidden');
+        });
+    </script>
+    {% endif %}
 
         async function syncAndRedirect(user) {
             const response = await fetch('/sync-user', {
