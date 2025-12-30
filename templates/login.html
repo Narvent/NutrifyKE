@@ -102,6 +102,13 @@
         }
     </script>
     {% else %}
+    <script>
+        window.addEventListener('load', function () {
+            document.getElementById('sign-in').classList.add('hidden');
+            document.getElementById('config-error').classList.remove('hidden');
+        });
+    </script>
+    {% endif %}
 </body>
 
 </html>
