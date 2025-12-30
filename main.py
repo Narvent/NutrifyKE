@@ -50,6 +50,10 @@ app.secret_key = SECRET_KEY
 CLERK_PUBLISHABLE_KEY = os.getenv('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY') or os.getenv('CLERK_PUBLISHABLE_KEY') or os.getenv('PUBLIC_KEY')
 CLERK_FRONTEND_API = os.getenv('CLERK_FRONTEND_API') or os.getenv('CLERK_API_URL') or get_clerk_fapi(CLERK_PUBLISHABLE_KEY)
 
+# Strip protocol if present in FAPI
+if CLERK_FRONTEND_API and CLERK_FRONTEND_API.startswith('http'):
+    CLERK_FRONTEND_API = CLERK_FRONTEND_API.replace('https://', '').replace('http://', '').split('/')[0]
+
 # Support both naming conventions for Gemini
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
 
