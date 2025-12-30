@@ -132,7 +132,12 @@
         window.addEventListener('load', function () {
             document.getElementById('sign-in').classList.add('hidden');
             document.getElementById('config-error').classList.remove('hidden');
-            document.getElementById('error-message').innerText = "Missing PUBLIC_KEY or Frontend API. Check Vercel settings.";
+            const pk = "{{ clerk_publishable_key }}";
+            const fapi = "{{ clerk_frontend_api }}";
+            let missing = [];
+            if (!pk || pk === 'None') missing.push("PUBLISHABLE_KEY");
+            if (!fapi || fapi === 'None') missing.push("FRONTEND_API");
+            document.getElementById('error-message').innerText = "Missing: " + missing.join(", ") + ". Please redeploy on Vercel after setting these variables.";
         });
     </script>
     {% endif %}

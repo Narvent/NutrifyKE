@@ -65,6 +65,13 @@ if CLERK_FRONTEND_API and CLERK_FRONTEND_API.startswith('http'):
 if CLERK_FRONTEND_API:
     os.environ['CLERK_FRONTEND_API'] = CLERK_FRONTEND_API
 
+print(f"--- STARTUP CONFIG ---")
+print(f"CLERK_PUBLISHABLE_KEY: {'Found' if CLERK_PUBLISHABLE_KEY else 'MISSING'}")
+print(f"CLERK_FRONTEND_API: {'Found' if CLERK_FRONTEND_API else 'MISSING'}")
+print(f"CLERK_SECRET_KEY: {'Found' if os.getenv('CLERK_SECRET_KEY') else 'MISSING'}")
+print(f"DATABASE_URL: {'Found' if os.getenv('DATABASE_URL') else 'MISSING'}")
+print(f"----------------------")
+
 # Support both naming conventions for Gemini
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
 
