@@ -4,7 +4,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.security import check_password_hash
 import utils
-import google.generativeai as genai
+from google import genai
 from PIL import Image
 import json
 import io
@@ -33,14 +33,13 @@ GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 if not GEMINI_API_KEY:
     print("WARNING: GEMINI_API_KEY (or GOOGLE_API_KEY) not found. AI features will not work.")
-    model = None
+    client = None
 else:
-    genai.configure(api_key=GEMINI_API_KEY)
     try:
-        model = genai.GenerativeModel('gemini-3-pro-preview')
+        client = genai.Client(api_key=GEMINI_API_KEY)
     except Exception as e:
-        print(f"Error initializing model: {e}")
-        model = None
+        print(f"Error initializing AI client: {e}")
+        client = None
 
 # Load local data on startup
 utils.load_data()
@@ -291,7 +290,7 @@ def manual_init_db():
 @limiter.limit("5 per minute")
 def analyze_image():
     # ... (Keep existing logic, just added @login_required)
-    if model is None:
+    if client is None:
         return jsonify({"status": "error", "error": "AI service not configured."}), 503
     
     if 'image' not in request.files: return jsonify({"error": "No image part"}), 400
@@ -337,7 +336,10 @@ def analyze_image():
         }}
         """
 
-        response = model.generate_content([prompt, image])
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=[prompt, image]
+        )
         raw_text = response.text.strip()
         
         if raw_text.startswith("```json"): raw_text = raw_text[7:]
