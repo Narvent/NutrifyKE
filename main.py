@@ -136,37 +136,53 @@ def logout():
 @app.route('/sync-user', methods=['POST'])
 def sync_user():
     """Sync Clerk user data with local database after frontend login."""
-    data = request.json
-    clerk_id = data.get('clerk_id')
-    email = data.get('email')
-    name = data.get('name')
-    
-    if not clerk_id or not email:
-        return jsonify({"success": False, "error": "Missing user data"}), 400
+    try:
+        data = request.json
+        clerk_id = data.get('clerk_id')
+        email = data.get('email')
+        name = data.get('name')
         
-    user_data = database_setup.get_user_by_clerk_id(clerk_id)
-    if not user_data:
-        # Check if user exists by email (to migrate old local users to Clerk)
-        user_data = database_setup.get_user_by_email(email)
-        if user_data:
-            # Update existing user with Clerk ID
-            conn, db_type = database_setup.get_db_connection()
-            c = conn.cursor()
-            if db_type == 'postgres':
-                c.execute('UPDATE users SET clerk_id = %s, display_name = %s WHERE id = %s', (clerk_id, name, user_data['id']))
-            else:
-                c.execute('UPDATE users SET clerk_id = ?, display_name = ? WHERE id = ?', (clerk_id, name, user_data['id']))
-            conn.commit()
-            conn.close()
-        else:
-            # Create new local record for Clerk user
-            uid = database_setup.create_user(email, name=name, clerk_id=clerk_id)
-            user_data = database_setup.get_user_by_id(uid)
+        if not clerk_id or not email:
+            return jsonify({"success": False, "error": "Missing user data"}), 400
             
-    # Log in the user locally
-    user = User(user_data['id'], user_data['email'], user_data.get('clerk_id'), user_data.get('display_name'))
-    login_user(user, remember=True)
-    return jsonify({"success": True})
+        user_data = database_setup.get_user_by_clerk_id(clerk_id)
+        if not user_data:
+            # Check if user exists by email (to migrate old local users to Clerk)
+            user_data = database_setup.get_user_by_email(email)
+            if user_data:
+                # Update existing user with Clerk ID
+                conn, db_type = database_setup.get_db_connection()
+                try:
+                    c = conn.cursor()
+                    if db_type == 'postgres':
+                        c.execute('UPDATE users SET clerk_id = %s, display_name = %s WHERE id = %s', (clerk_id, name, user_data['id']))
+                    else:
+                        c.execute('UPDATE users SET clerk_id = ?, display_name = ? WHERE id = ?', (clerk_id, name, user_data['id']))
+                    conn.commit()
+                finally:
+                    conn.close()
+                # Re-fetch updated user data
+                user_data = database_setup.get_user_by_id(user_data['id'])
+            else:
+                # Create new local record for Clerk user
+                uid = database_setup.create_user(email, name=name, clerk_id=clerk_id)
+                if uid:
+                    user_data = database_setup.get_user_by_id(uid)
+                else:
+                    return jsonify({"success": False, "error": "Failed to create user record. Check database logs."}), 500
+                
+        if not user_data:
+            return jsonify({"success": False, "error": "User sync failed: could not retrieve user data."}), 500
+
+        # Log in the user locally
+        user = User(user_data['id'], user_data['email'], user_data.get('clerk_id'), user_data.get('display_name'))
+        login_user(user, remember=True)
+        return jsonify({"success": True})
+    except Exception as e:
+        print(f"ERROR in /sync-user: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # --- MAIN ROUTES ---
 
