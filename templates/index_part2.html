@@ -303,10 +303,15 @@ if (item.analysis.layout.fullness_index < 0.4) defaultIndex=0; else if (item.ana
                 }
 
                 async function handleSignOut() {
-                if (typeof Clerk !== 'undefined' && Clerk.isReady()) {
+                try {
+                if (typeof Clerk !== 'undefined') {
                 await Clerk.signOut();
                 }
+                } catch (e) {
+                console.warn("Clerk signOut failed", e);
+                } finally {
                 window.location.href = "{{ url_for('logout') }}";
+                }
                 }
 
                 // Initialize Clerk on the main page for session monitoring
