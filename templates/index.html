@@ -14,7 +14,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     {% if clerk_frontend_api and clerk_publishable_key %}
     <script async crossorigin="anonymous"
-        src="https://{{ clerk_frontend_api }}/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+        src="https://{{ clerk_frontend_api }}/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
         data-clerk-publishable-key="{{ clerk_publishable_key }}">
         </script>
     {% endif %}
@@ -1203,10 +1203,17 @@
         }
 
         async function handleSignOut() {
-            if (typeof Clerk !== 'undefined' && Clerk.isReady()) {
-                await Clerk.signOut();
+            try {
+                if (typeof Clerk !== 'undefined') {
+                    // Try to sign out from Clerk if session is active
+                    await Clerk.signOut();
+                }
+            } catch (e) {
+                console.warn("Clerk signOut failed", e);
+            } finally {
+                // Always clear the local session and redirect
+                window.location.href = "{{ url_for('logout') }}";
             }
-            window.location.href = "{{ url_for('logout') }}";
         }
 
         // Initialize Clerk on the main page for session monitoring
