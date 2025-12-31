@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
+from flask import Flask, jsonify, request, render_template, redirect, url_for, flash, send_from_directory
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -211,6 +211,33 @@ def home():
 @app.route('/privacy')
 def privacy():
     return render_template('privacy.html')
+
+# --- STATIC ASSET ROUTES (Serving from root) ---
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+@app.route('/favicon-16x16.png')
+def favicon16():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon-16x16.png', mimetype='image/png')
+
+@app.route('/favicon-32x32.png')
+def favicon32():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon-32x32.png', mimetype='image/png')
+
+@app.route('/apple-touch-icon.png')
+def apple_touch_icon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'apple-touch-icon.png', mimetype='image/png')
+
+@app.route('/site.webmanifest')
+@app.route('/manifest.json')
+def manifest():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'site.webmanifest', mimetype='application/manifest+json')
 
 @app.route('/foods')
 @login_required

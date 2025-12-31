@@ -1,6 +1,6 @@
 This favicon was generated using the following font:
 
-- Font Title: Black Ops One
+- Font Title: Material Icons
 - Font Author: undefined
-- Font Source: https://fonts.gstatic.com/s/blackopsone/v20/qWcsB6-ypo7xBdr6Xshe96H3WDzRtjkho4M.ttf
+- Font Source: https://fonts.gstatic.com/s/materialicons/v143/flUhRq6tzZclQEJ-Vdg-IuiaDsNZIhI8tIHh.ttf
 - Font License: undefined)
