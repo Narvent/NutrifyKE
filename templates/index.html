@@ -39,7 +39,7 @@
             <div>
                 <h1 class="text-3xl font-bold tracking-tight">Afyniq</h1>
                 {% if user and user.is_authenticated %}
-                <p class="text-xs opacity-80 mt-1">Logged in as {{ user.email }}</p>
+                <p class="text-xs opacity-80 mt-1">Logged in as {{ user.display_name }}</p>
                 {% endif %}
             </div>
             <div class="flex items-center gap-4">

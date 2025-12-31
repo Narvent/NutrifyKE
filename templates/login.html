@@ -118,7 +118,7 @@
                     body: JSON.stringify({
                         clerk_id: user.id,
                         email: user.primaryEmailAddress.emailAddress,
-                        name: user.fullName
+                        name: user.username || user.fullName || user.primaryEmailAddress.emailAddress.split('@')[0]
                     })
                 });
                 if (response.ok) {
